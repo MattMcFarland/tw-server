@@ -8,6 +8,7 @@ class Comment extends Base {
   constructor() {
     super('comments');
     this.message = String;
+    this.comments = [Comment];
   }
 
   edit (editor, data, callback) {

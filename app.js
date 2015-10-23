@@ -8,8 +8,7 @@ const
   logger = require('morgan'),
   camo = require('camo'),
   path = require('path'),
-  stormpath = require('express-stormpath'),
-  Dog = require('./models/Dog');
+  stormpath = require('express-stormpath');
 
 // App Modules
 const

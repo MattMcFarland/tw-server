@@ -34,7 +34,19 @@ class Base extends Document {
 
   }
 
+  get DTO () {
+    return Object.assign(this._values, {
+      authorName: this.authorName,
+      authorUrl: this.authorUrl,
+      editorName: this.editorName,
+      editorUrl: this.editorUrl,
+      id: this.id
+    })
+  }
   get authorName () {
+    if (!this.author) {
+      return '';
+    }
     return this.author.fullName;
   }
 
@@ -46,6 +58,9 @@ class Base extends Document {
   }
 
   get authorUrl () {
+    if (!this.author) {
+      return '';
+    }
     return 'users/' + Utils.Users.getId(this.author);
   }
 

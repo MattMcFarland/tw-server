@@ -3,21 +3,24 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon --harmony_destructuring --harmony_proxies ./bin/www"
+    "start": "nodemon --harmony_modules --harmony_destructuring --harmony_proxies ./bin/www"
   },
   "dependencies": {
     "async": "^1.4.2",
+    "babel": "^5.8.23",
     "body-parser": "~1.13.2",
     "camo": "^0.8.0",
     "chalk": "^1.1.1",
     "compression": "^1.6.0",
     "cookie-parser": "~1.3.5",
     "debug": "~2.2.0",
+    "es6-module-loader": "^0.17.8",
     "express": "~4.13.1",
     "express-stormpath": "^1.0.6",
     "hbs": "~3.1.0",
     "lodash": "^3.10.1",
     "md5": "^2.0.0",
+    "mongodb": "^2.0.46",
     "mongoose": "^4.2.2",
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0",

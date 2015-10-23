@@ -13,7 +13,7 @@ class Comment extends Base {
   edit (editor, data, callback) {
     try {
       this.editor = editor;
-      this.updated_at = new Date().toISOString();
+      this.updated_at = Date.now;
       this.message = data.message;
       this.save().then((i) => callback(null, i));
     } catch (e) {

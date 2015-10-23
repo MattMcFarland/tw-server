@@ -1,58 +1,39 @@
 const
   api = require('express').Router(),
   TutorialRequest = require('../models/TutorialRequest'),
-  Dog = require('../models/Dog'),
+  TutorialSolution = require('../models/TutorialSolution'),
+  Comment = require('../models/Comment'),
   Utils = require ('../utils');
 
+function createEndpoints(path, model) {
 
+  api.get(path, (req, res) =>
+    Utils.API.getAll(model, res));
 
-api.get('/tutorial-requests', function(req, res) {
-  TutorialRequest.loadMany()
-    .then((tr) => {
-      res.json(tr);
-    })
-    .catch((e) => Utils.Log.error(e));
-});
+  api.get(path + '/:id', (req, res) =>
+    Utils.API.getById(model, req, res));
 
-api.get('/tutorial-requests/:id', function(req, res) {
-  TutorialRequest.loadOne({id: req.params.id })
-    .then((tr) => {
-      res.json(tr);
-    })
-    .catch((e) => Utils.Log.error(e));
-});
+  api.post(path, (req, res) =>
+    Utils.API.create(model, req, res));
 
-api.post('/tutorial-requests', function(req, res) {
-  TutorialRequest.create(req.body)
-    .save()
-    .then((t) => {res.json(t)})
-    .catch((e) => Utils.Log.error(e));
-});
+  api.put(path + '/:id', (req, res) =>
+    Utils.API.update(model, req, res));
 
-api.put('/tutorial-requests/:id', function(req, res) {
-  TutorialRequest.loadOneAndUpdate({id: req.params.id}, req.body).save().then((tr) => { res.json(tr) });
-});
+  api.put(path + '/:id/flag', (req, res) =>
+    Utils.API.flag(model, req, res));
 
+  api.put(path + '/:id/vote', (req, res) =>
+    Utils.API.vote(model, req, res));
 
+  api.put(path + '/:id/comment', (req, res) =>
+    Utils.API.comment(model, req, res));
 
+  api.delete(path + '/:id', (req, res) =>
+    Utils.API.delete(model, req, res));
+}
 
+createEndpoints('/tutorial-requests', TutorialRequest);
+createEndpoints('/tutorial-solutions', TutorialSolution);
+createEndpoints('/comments', Comment);
 
-
-
-api.get('/dogs', function(req, res) {
-  Dog.loadMany().then((tr) => {
-    res.json(tr);
-  });
-});
-
-api.post('/dogs', function (req, res) {
-  var lassie = Dog.create({
-    name: req.body.name,
-    breed: req.body.breed
-  });
-
-  lassie.save().then(function(l) {
-    res.json(l);
-  });
-});
 module.exports = api;

@@ -1,7 +1,8 @@
 "use strict";
 const
   Actionable = require('./Actionable'),
-  Utils    = require('../utils');
+  Utils    = require('../utils'),
+  ObjectID = require('mongodb').ObjectID;
 
 class TutorialSolution extends Actionable {
   constructor() {

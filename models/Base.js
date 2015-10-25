@@ -29,18 +29,7 @@ class Base extends Document {
 
   }
 
-  get DTO () {
 
-    return Object.assign(this._values, {
-      id: this.id,
-      authorName: this.authorName,
-      authorUrl: this.authorUrl,
-      editorName: this.editorName,
-      editorUrl: this.editorUrl,
-      flags: this.flags,
-      score: this.tallyVotes()
-    })
-  }
 
   get flags () {
     return {

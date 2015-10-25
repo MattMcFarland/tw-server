@@ -11,6 +11,7 @@ class Middlewares {
       req.user = {
         username: 'bigfeet69420',
         fullName: 'MR BIG',
+        customData: {},
         save: function () {
           Utils.Log.warn('faux user fake save');
         }

@@ -8,6 +8,19 @@ class Comment extends Base {
     this.message = String;
     this.comments = [Comment];
   }
+
+  get DTO () {
+    return Object.assign(this._values, {
+      id: this.id,
+      authorName: this.authorName,
+      authorUrl: this.authorUrl,
+      editorName: this.editorName,
+      editorUrl: this.editorUrl,
+      flags: this.flags,
+      score: this.tallyVotes()
+    })
+  }
+
   edit (editor, data) {
     return new Promise((resolve, reject) => {
       this.editor = editor;

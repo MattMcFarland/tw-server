@@ -11,13 +11,13 @@ exports.getAll = (M, res) => {
 };
 
 exports.getById = (M, req, res) => {
-  return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => res.json(m.DTO))
+  return M.loadOne({_id: ObjectID(req.params.id)}, {populate: true})
+    .then((m) => m.DTO.then((mm) => {res.json(mm);}))
     .catch((e) => Utils.Log.error(e));
 };
 
 exports.addToDB = (M, req, res) => {
-  var create = (data) => M.create(data)
+  var create = (data) => M.create(Object.assign(data, {author: req.user}))
       .save()
       .then(doc => res.json(doc.DTO))
       .catch(e => Utils.Log.error(e));

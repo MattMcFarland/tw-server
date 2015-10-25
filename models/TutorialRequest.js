@@ -2,8 +2,10 @@
 const
   Actionable  = require('./Actionable'),
   Solution    = require('./TutorialSolution'),
+  Comment     = require('./Comment'),
   Tag         = require('./Tag'),
-  Utils       = require('../utils');
+  Utils       = require('../utils'),
+  ObjectID = require('mongodb').ObjectID;
 
 class TutorialRequest extends Actionable {
 
@@ -14,6 +16,40 @@ class TutorialRequest extends Actionable {
     this.solutions = [Solution];
     this.tags = [Tag];
     this.permalink = String;
+  }
+  get DTO () {
+    return new Promise((resolve, reject) => {
+      var solutionPromises = this._values.solutions.map((sol) => {
+        return Promise.all(sol._values.comments.map((com) => {
+          var solution = Object.assign(sol.DTO, {
+            comments: []
+          });
+          return new Promise((res, rej) => {
+            Comment.loadOne({_id: com}).then((comment) => {
+              solution.comments[solution.comments.length] = (Object.assign(comment, comment.DTO));
+              res(solution)
+            })
+          })
+        }))
+      });
+
+      Promise.all(solutionPromises).then((solutions) => {
+        resolve({
+          solutions,
+          id: this.id,
+          title: this.title,
+          linkMeta: this.linkMeta,
+          authorName: this.authorName,
+          authorUrl: this.authorUrl,
+          editorName: this.editorName,
+          editorUrl: this.editorUrl,
+          flags: this.flags,
+          score: this.tallyVotes(),
+          comments: this._values.comments
+        }, this._values)
+      });
+    });
+
   }
 
   edit (editor, fields) {

@@ -13,22 +13,22 @@ function createEndpoints(path, model) {
   api.get(path + '/:id', (req, res) =>
     Utils.API.getById(model, req, res));
 
-  api.post(path, (req, res) =>
-    Utils.API.create(model, req, res));
+  api.post(path,  Utils.Middlewares.authenticate,  (req, res) =>
+    Utils.API.addToDB(model, req, res));
 
-  api.put(path + '/:id', (req, res) =>
+  api.put(path + '/:id',  Utils.Middlewares.authenticate,  (req, res) =>
     Utils.API.update(model, req, res));
 
-  api.put(path + '/:id/flag', (req, res) =>
+  api.put(path + '/:id/flag',  Utils.Middlewares.authenticate,  (req, res) =>
     Utils.API.flag(model, req, res));
 
-  api.put(path + '/:id/vote', (req, res) =>
+  api.put(path + '/:id/vote',  Utils.Middlewares.authenticate,  (req, res) =>
     Utils.API.vote(model, req, res));
 
-  api.put(path + '/:id/comment', (req, res) =>
+  api.put(path + '/:id/comment',  Utils.Middlewares.authenticate,  (req, res) =>
     Utils.API.comment(model, req, res));
 
-  api.delete(path + '/:id', (req, res) =>
+  api.delete(path + '/:id',  Utils.Middlewares.authenticate,  (req, res) =>
     Utils.API.delete(model, req, res));
 }
 

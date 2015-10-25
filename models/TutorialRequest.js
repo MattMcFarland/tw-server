@@ -5,16 +5,15 @@ const
   Tag         = require('./Tag'),
   Utils       = require('../utils');
 
-
 class TutorialRequest extends Actionable {
   constructor() {
     super('tutorialrequests');
     this.engine = String;
-    this.version =String;
+    this.version = String;
     this.solutions = [Solution];
     this.tags = [Tag];
+    this.permalink = String;
   }
-
   edit (editor, fields, callback) {
     var self = this,
       done = false,

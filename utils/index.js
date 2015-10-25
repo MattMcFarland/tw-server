@@ -1,5 +1,9 @@
 exports.Log = require('./Log');
 exports.Users = require('./Users');
 exports.xss = require('xss');
+exports.sanitize = require('./sanitize');
 exports.async = require('async');
 exports.API = require('./API');
+exports.error = require('./error');
+exports.Middlewares = require('./Middlewares');
+exports.createPermalink = require('./createPermalink');

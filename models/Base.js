@@ -16,15 +16,10 @@ class Base extends Document {
       content:  { type: String },
 
       /* Flagging */
-      flags_spam:       { type: Number },
-      flags_vague:      { type: Number },
-      flags_offensive:  { type: Number },
-      flags_duplicate:  { type: Number },
       flaggers:         { type: [Object]},
 
       /* Voting */
       voters: { type: [Object] },
-      votes:  { type: Number, default: 0},
 
       /* Meta */
       created_at: { type: Date, default: Date.now },
@@ -34,14 +29,31 @@ class Base extends Document {
 
   }
 
+  static errorOut (e, cb) {
+    Utils.Log(e);
+    cb(e);
+  }
+
   get DTO () {
-    return Object.assign(this._values, {
+
+    return Object.assign(this, {
       authorName: this.authorName,
       authorUrl: this.authorUrl,
       editorName: this.editorName,
       editorUrl: this.editorUrl,
-      id: this.id
+      id: this.id,
+      flags: this.flags,
+      score: this.tallyVotes()
     })
+  }
+
+  get flags () {
+    return {
+      spam: this.countFlags('spam'),
+      offensive: this.countFlags('offensive'),
+      vague: this.countFlags('vague'),
+      duplicate: this.countFlags('duplicate')
+    }
   }
   get authorName () {
     if (!this.author) {
@@ -72,21 +84,16 @@ class Base extends Document {
   }
 
   countFlags (flagType) {
-    var list = _.find(this.flaggers, {type: flagType});
-    return list ? list.length : 0;
-  }
-
-  calculateFlags () {
-    this.flags_spam = this.countFlags('spam');
-    this.flags_vague = this.countFlags('vague');
-    this.flags_offensive = this.countFlags('offensive');
-    this.flags_duplicate = this.countFlags('duplicate');
+    return _.countBy(this.flaggers, {type: flagType}).true || 0;
   }
 
   addOrRemoveFlag (user, flagType, callback) {
     var flagIndex, flag, result;
 
     try {
+      console.log('flagging', user, flagType);
+      this.flaggers || (this.flaggers = []);
+
       flagIndex = _.findIndex(this.flaggers, {'uid': Utils.Users.getId(user), type: flagType});
       flag = flagIndex > -1 ? this.flaggers[flagIndex] : undefined;
       result = {
@@ -105,12 +112,15 @@ class Base extends Document {
         result.isFlagged = true;
       }
 
-      // total the number of flags by each type
-      this.calculateFlags();
       // signal back the new flag
       user.save();
-      this.save(() => callback(null, result));
-
+      this.save()
+        .then(() => callback(null, result))
+        .catch((e) => {
+          Utils.Log.error(e);
+          callback(e);
+        });
+      console.log('result', result);
     } catch (e) {
       Utils.Log.error(e);
       callback(e);
@@ -122,7 +132,7 @@ class Base extends Document {
     var voteIndex, newVote, oldVote;
 
     try {
-
+      this.voters || (this.voters = []);
       voteIndex = _.findIndex(this.voters, {'uid': Utils.Users.getId(user)});
 
       if (voteIndex === -1) {
@@ -142,14 +152,15 @@ class Base extends Document {
         vote: newVote
       });
 
-      this.votes = this.tallyVotes();
-      this.save((i) => {
+      this.save().then((i) => {
         callback(null, {
-          "score": i.votes,
+          "score": i.score,
           "userVote": newVote
         });
+      }).catch((e) => {
+        Utils.Log.error(e);
+        callback(e);
       });
-
     } catch(e) {
       Utils.Log.error(e);
       callback(e);
@@ -168,10 +179,15 @@ class Base extends Document {
 
   removeOrUndoRemove (editor, callback) {
     try {
-      this.updated_at = new Date().toISOString();
+      this.updated_at = Date.now();
       this.editor = editor;
       this.removed = !this.removed;
-      this.save((i) => callback(null, i));
+      this.save()
+        .then((i) => callback(null, i))
+        .catch((e) => {
+          Utils.Log.error(e);
+          callback(e);
+        });
     } catch (e) {
       Utils.Log.error(e);
       callback(e);

@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon --harmony_modules --harmony_destructuring --harmony_proxies ./bin/www",
+    "happy": "FAUX_USER=true node --harmony_modules --harmony_destructuring --harmony_proxies ./bin/www && npm test",
+    "start": "FAUX_USER=true nodemon --harmony_modules --harmony_destructuring --harmony_proxies ./bin/www",
     "test": "mocha"
   },
   "dependencies": {
@@ -20,7 +21,7 @@
     "express": "~4.13.1",
     "express-stormpath": "^1.0.6",
     "hbs": "~3.1.0",
-    "lodash": "^3.10.1",
+    "lodash": "3.0.1",
     "md5": "^2.0.0",
     "mocha": "^2.3.3",
     "mongodb": "^2.0.46",

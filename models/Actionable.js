@@ -10,7 +10,9 @@ class Actionable extends Base {
   constructor(name) {
     super(name);
 
-    this.comments = [Comment];
+    this.comments = {
+      type: [Comment]
+    };
 
   }
 

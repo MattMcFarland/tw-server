@@ -29,19 +29,14 @@ class Base extends Document {
 
   }
 
-  static errorOut (e, cb) {
-    Utils.Log(e);
-    cb(e);
-  }
-
   get DTO () {
 
-    return Object.assign(this, {
+    return Object.assign(this._values, {
+      id: this.id,
       authorName: this.authorName,
       authorUrl: this.authorUrl,
       editorName: this.editorName,
       editorUrl: this.editorUrl,
-      id: this.id,
       flags: this.flags,
       score: this.tallyVotes()
     })
@@ -87,84 +82,73 @@ class Base extends Document {
     return _.countBy(this.flaggers, {type: flagType}).true || 0;
   }
 
-  addOrRemoveFlag (user, flagType, callback) {
-    var flagIndex, flag, result;
+  addOrRemoveFlag (user, flagType) {
+    return new Promise((resolve, reject) => {
+      var flagIndex, flag, result;
+      try {
+        this.flaggers || (this.flaggers = []);
 
-    try {
-      console.log('flagging', user, flagType);
-      this.flaggers || (this.flaggers = []);
+        flagIndex = _.findIndex(this.flaggers, {'uid': Utils.Users.getId(user), type: flagType});
+        flag = flagIndex > -1 ? this.flaggers[flagIndex] : undefined;
+        result = {
+          flagType: flagType,
+          isFlagged: null
+        };
 
-      flagIndex = _.findIndex(this.flaggers, {'uid': Utils.Users.getId(user), type: flagType});
-      flag = flagIndex > -1 ? this.flaggers[flagIndex] : undefined;
-      result = {
-        flagType: flagType,
-        isFlagged: null
-      };
-
-      if (flag) {
-        this.flaggers.splice(flagIndex, 1);
-        result.isFlagged = false;
-      } else if (typeof flag === "undefined") {
-        this.flaggers.push({
-          uid: Utils.Users.getId(user),
-          type: flagType
-        });
-        result.isFlagged = true;
-      }
-
-      // signal back the new flag
-      user.save();
-      this.save()
-        .then(() => callback(null, result))
-        .catch((e) => {
-          Utils.Log.error(e);
-          callback(e);
-        });
-      console.log('result', result);
-    } catch (e) {
-      Utils.Log.error(e);
-      callback(e);
-    }
+        if (flag) {
+          this.flaggers.splice(flagIndex, 1);
+          result.isFlagged = false;
+        } else if (typeof flag === "undefined") {
+          this.flaggers.push({
+            uid: Utils.Users.getId(user),
+            type: flagType
+          });
+          result.isFlagged = true;
+        }
+        // signal back the new flag
+        user.save();
+        this.save()
+          .then(() => resolve(result))
+          .catch((e) => reject(e));
+      } catch (e) { reject(e) }
+    });
 
   }
 
-  createOrUpdateVote (user, direction, callback) {
-    var voteIndex, newVote, oldVote;
+  createOrUpdateVote (user, direction) {
+    return new Promise((resolve, reject) => {
+      var voteIndex, newVote, oldVote;
 
-    try {
-      this.voters || (this.voters = []);
-      voteIndex = _.findIndex(this.voters, {'uid': Utils.Users.getId(user)});
+      try {
+        this.voters || (this.voters = []);
+        voteIndex = _.findIndex(this.voters, {'uid': Utils.Users.getId(user)});
 
-      if (voteIndex === -1) {
-        newVote = direction === "up" ? 1 : -1;
-      } else {
-        oldVote = this.voters[voteIndex].vote;
-        if (direction === "up") {
-          newVote = oldVote === 1 ? 0 : 1;
-        } else if (direction === "down") {
-          newVote = oldVote === -1 ? 0 : -1;
+        if (voteIndex === -1) {
+          newVote = direction === "up" ? 1 : -1;
+        } else {
+          oldVote = this.voters[voteIndex].vote;
+          if (direction === "up") {
+            newVote = oldVote === 1 ? 0 : 1;
+          } else if (direction === "down") {
+            newVote = oldVote === -1 ? 0 : -1;
+          }
+          this.voters.splice(voteIndex, 1);
         }
-        this.voters.splice(voteIndex, 1);
-      }
 
-      this.voters.push({
-        uid: Utils.Users.getId(user),
-        vote: newVote
-      });
-
-      this.save().then((i) => {
-        callback(null, {
-          "score": i.score,
-          "userVote": newVote
+        this.voters.push({
+          uid: Utils.Users.getId(user),
+          vote: newVote
         });
-      }).catch((e) => {
-        Utils.Log.error(e);
-        callback(e);
-      });
-    } catch(e) {
-      Utils.Log.error(e);
-      callback(e);
-    }
+
+        this.save()
+          .then((i) => {
+          resolve({
+            "score": i.score,
+            "userVote": newVote
+          });
+        }).catch((e) => reject(e));
+      } catch (e) { reject(e) }
+    });
   }
 
   tallyVotes () {
@@ -177,21 +161,17 @@ class Base extends Document {
     return score;
   }
 
-  removeOrUndoRemove (editor, callback) {
-    try {
-      this.updated_at = Date.now();
-      this.editor = editor;
-      this.removed = !this.removed;
-      this.save()
-        .then((i) => callback(null, i))
-        .catch((e) => {
-          Utils.Log.error(e);
-          callback(e);
-        });
-    } catch (e) {
-      Utils.Log.error(e);
-      callback(e);
-    }
+  removeOrUndoRemove (editor) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.updated_at = Date.now();
+        this.editor = editor;
+        this.removed = !this.removed;
+        this.save()
+          .then((i) => resolve(i))
+          .catch((e) => reject(e));
+      } catch (e) { reject(e) }
+    });
   }
 
 }

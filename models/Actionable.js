@@ -16,17 +16,18 @@ class Actionable extends Base {
 
   }
 
-  addComment (author, message, callback) {
-    try {
-      this.comments.push(Comment.create({
+  addComment (author, message) {
+    return new Promise((resolve, reject) => {
+      Comment.create({
         author,
         message: Utils.xss(message)
-      }));
-      this.save((i)=>callback(null, i));
-    } catch (e) {
-      Utils.Log.error(e);
-      callback(e, null);
-    }
+      }).save().then((comment) => {
+        this.comments.push(comment);
+        this.save()
+          .then(() => resolve(comment))
+          .catch((e) => reject(e))
+      }).catch((e) => reject(e))
+    });
   }
 
 }

@@ -6,6 +6,7 @@ const
   Utils       = require('../utils');
 
 class TutorialRequest extends Actionable {
+
   constructor() {
     super('tutorialrequests');
     this.engine = String;
@@ -14,92 +15,84 @@ class TutorialRequest extends Actionable {
     this.tags = [Tag];
     this.permalink = String;
   }
-  edit (editor, fields, callback) {
-    var self = this,
-      done = false,
-      tutRequest = this,
-      timestamp = new Date().toISOString();
 
-    if (fields) {
-      this.editor = editor;
-      this.updated_at = timestamp;
-      this.content = fields.content ? Utils.xss(fields.content) : this.content;
-      this.engine = fields.engine ? Utils.xss(fields.engine) : this.engine;
-      this.version = fields.version ? Utils.xss(fields.version) : this.version;
-      this.title = fields.title ? Utils.xss(fields.title) : this.title;
-      if (fields.tags) {
-        this.tags = [];
-        Utils.async.eachSeries(fields.tags.split(','), function iterator(tagName, next) {
-          console.log('proccessing tag', tagName);
-          async.setImmediate(function () {
-            if (!done) {
-              Tag.findOne({name: tagName}, function (err, tag) {
-                console.log(err, tag);
-                if (!err && tag) {
-                  (function () {
-                    tag.last_used_date = timestamp;
-                    if (!tag.count) {
-                      tag.count = 1;
-                    } else {
-                      tag.count++;
-                    }
-                    console.log('use existing tag', tagName);
-                    tag.save();
-                    tutRequest.tags.push(tag);
-                    tutRequest.save();
-                  })();
-                } else {
-                  (function () {
-                    var newTag = new Tag();
-                    newTag.name = tagName;
-                    newTag.count = 1;
-                    newTag.last_used_date = timestamp;
-                    newTag.save();
-                    tutRequest.tags.push(newTag);
-                    tutRequest.save();
-                    console.log('create new tag', newTag.name);
-                  })();
-                }
-                setTimeout(function () {
-                  next();
-                }, 100);
-              });
-            } else {
-              setTimeout(function () {
+  edit (editor, fields) {
+    return new Promise((resolve, reject) => {
+      var done = false,
+        timestamp = Date.now();
+
+      if (fields) {
+        this.editor = editor;
+        this.updated_at = timestamp;
+        this.content = fields.content ? Utils.xss(fields.content) : this.content;
+        this.engine = fields.engine ? Utils.xss(fields.engine) : this.engine;
+        this.version = fields.version ? Utils.xss(fields.version) : this.version;
+        this.title = fields.title ? Utils.xss(fields.title) : this.title;
+
+        if (fields.tags) {
+          this.tags = Array.isArray(this.tags) ? this.tags : [];
+          Utils.async.eachSeries(fields.tags.split(','), (tagName, next) => {
+            async.setImmediate(() => {
+              if (done) {
                 next();
-              }, 100);
-            }
+              } else {
+                Tag.loadOne({name: tagName}).then((tag) => {
+                  if (tag) {
+                    tag.last_used_date = timestamp;
+                    tag.count = (!tag.count) ? 1 : tag.count + 1;
+                    tag.save()
+                      .then(() => {
+                        this.tags.push(tag);
+                        this.save().then(() => {
+                          next();
+                        }).catch((e) => reject(e));
+                      }).catch((e) => reject(e));
+                  } else {
+                    Tag.create({
+                      name: tagName,
+                      count: 1,
+                      last_used_date: timestamp
+                    }).save()
+                      .then(() => {
+                        this.tags.push(tag);
+                        this.save().then(() => {
+                          next();
+                        }).catch((e) => reject(e));
+                      }).catch((e) => reject(e));
+                  }
+                });
+              }
+            });
+          }, () => {
+            done = true;
+            this.save()
+              .then((t) => resolve(t))
+              .catch((e) => reject(e));
           });
-        }, function() {
-          done = true;
-          self.save();
-          setTimeout(function () {
-            callback(null, tutRequest);
-          }, 100);
-        });
+        } else {
+          this.save()
+            .then((t) => resolve(t))
+            .catch((e) => reject(e));
+        }
       } else {
-        done = true;
-        this.save();
-        callback(null, tutRequest);
+        reject("invalid fields");
       }
-    } else {
-      callback("invalid fields", null);
-    }
+    });
   }
 
-  addSolution (author, data, callback) {
-    var solution = new Solution();
-    try {
-      solution.author = author;
-      solution.linkMeta = data.linkMeta;
-      solution.content = Utils.xss(data.content);
-      solution.save();
-      this.solutions.push(solution);
-      this.save();
-      callback(null, solution);
-    } catch (e) {
-      Utils.Log.error(e);
-    }
+  addSolution (author, data) {
+    return new Promise((resolve, reject) => {
+      Solution.create({
+        author,
+        linkMeta: data.linkMeta,
+        content: Utils.xss(data.content)
+      }).save().then((solution) => {
+        this.solutions.push(solution);
+        this.save()
+          .then((s) => resolve(s))
+          .catch((e) => reject(e));
+      }).catch((e) => reject(e));
+    });
   }
 
 }

@@ -1,3 +1,5 @@
+"use strict";
+
 exports.Log = require('./Log');
 exports.Users = require('./Users');
 exports.xss = require('xss');

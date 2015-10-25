@@ -1,6 +1,5 @@
-var request = require('supertest');
-var camo = require('camo');
-var testid = '5629f297d319dafb209647a3';
+const request = require('supertest');
+const testid = '562c7492a2167bbc4525d33c';
 
 describe('GET /api/tutorial-requests', () => {
   it('get list of tutorail request', (done) => {

@@ -8,7 +8,11 @@ class Log {
   }
 
   static warn(msg) {
-    console.log(chalk.yellow('\n', msg, '\n'));
+    console.log(chalk.yellow(msg));
+  }
+
+  static info(msg) {
+    console.log(chalk.cyan(msg));
   }
 
 }

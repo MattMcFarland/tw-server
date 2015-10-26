@@ -11,8 +11,8 @@ exports.getAll = (M, res) => {
 };
 
 exports.getById = (M, req, res) => {
-  return M.loadOne({_id: ObjectID(req.params.id)}, {populate: true})
-    .then((m) => m.DTO.then((mm) => {res.json(mm);}))
+  return M.loadOne({_id: ObjectID(req.params.id)})
+    .then((m) => res.json(m.DTO))
     .catch((e) => Utils.Log.error(e));
 };
 

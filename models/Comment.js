@@ -10,15 +10,17 @@ class Comment extends Base {
   }
 
   get DTO () {
-    return Object.assign(this._values, {
+    return {
+      type: 'Comment',
       id: this.id,
       authorName: this.authorName,
       authorUrl: this.authorUrl,
       editorName: this.editorName,
       editorUrl: this.editorUrl,
+      message: this.message,
       flags: this.flags,
       score: this.tallyVotes()
-    })
+    }
   }
 
   edit (editor, data) {

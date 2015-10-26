@@ -18,30 +18,17 @@ class Actionable extends Base {
   }
   get DTO () {
 
-    var mecomments = this._values.comments.map((com) => {
-      if (com.DTO) {
-        return com.DTO;
-      } else {
-        console.log('yarr me comment', com);
-        return Comment.loadOne({_id: com})
-      }
-    });
-    console.log('yar');
-    return Promise.all(mecomments).then((tharBeTheComments) => {
-      console.log('promise complete ????', tharBeTheComments);
-      return Object.assign(this._values, {
-        populated: true,
-        id: this.id,
-        authorName: this.authorName,
-        authorUrl: this.authorUrl,
-        editorName: this.editorName,
-        editorUrl: this.editorUrl,
-        flags: this.flags,
-        score: this.tallyVotes(),
-        comments: tharBeTheComments
-      })
-    });
-
+    return Object.assign(this._values, {
+      type: 'Actionable',
+      id: this.id,
+      authorName: this.authorName,
+      authorUrl: this.authorUrl,
+      editorName: this.editorName,
+      editorUrl: this.editorUrl,
+      flags: this.flags,
+      score: this.tallyVotes(),
+      comments: this.comments.DTO
+    })
   }
 
   addComment (author, message) {

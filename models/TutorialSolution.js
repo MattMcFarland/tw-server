@@ -2,12 +2,35 @@
 const
   Actionable = require('./Actionable'),
   Utils    = require('../utils'),
+  Comment =require('./Comment'),
   ObjectID = require('mongodb').ObjectID;
 
 class TutorialSolution extends Actionable {
   constructor() {
     super('tutorialsolutions');
     this.linkMeta = {type: Object};
+  }
+
+  get DTO () {
+    return {
+      type: 'TutorialSolution',
+      id: this.id,
+      authorName: this.authorName,
+      authorUrl: this.authorUrl,
+      editorName: this.editorName,
+      editorUrl: this.editorUrl,
+      flags: this.flags,
+      score: this.tallyVotes(),
+      comments: this.comments.map((com) => {
+        if (com.DTO) {
+          return com.DTO;
+        } else {
+          return Comment.loadOne({_id: com})
+            .then((m) => m.DTO)
+            .catch((e) => Utils.Log.error(e));
+        }
+      })
+    }
   }
 
   edit (editor, fields) {

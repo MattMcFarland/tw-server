@@ -19,25 +19,32 @@ class TutorialRequest extends Actionable {
     this.permalink = String;
   }
   get DTO () {
+    return new Promise((resolve, reject) => {
+      var dto = {
+        type: "TutorialRequest",
+        solutions: Promise.all(this.solutions.map((sol, i) => {
+          if (i === (this.solutions.length - 1)) {
+            console.log('solutions done');
+            resolve(dto);
+          }
+          return sol.DTO
+        })),
+        id: this.id,
+        title: this.title,
+        linkMeta: this.linkMeta,
+        authorName: this.authorName,
+        authorUrl: this.authorUrl,
+        editorName: this.editorName,
+        editorUrl: this.editorUrl,
+        flags: this.flags,
+        score: this.tallyVotes(),
+        comments: this.comments.map((com) => {
+          return com.DTO;
+        })
+      };
+    });
 
-    return {
-      type: "TutorialRequest",
-      solutions: this.solutions.map((sol) => {
-        return sol.DTO;
-      }),
-      id: this.id,
-      title: this.title,
-      linkMeta: this.linkMeta,
-      authorName: this.authorName,
-      authorUrl: this.authorUrl,
-      editorName: this.editorName,
-      editorUrl: this.editorUrl,
-      flags: this.flags,
-      score: this.tallyVotes(),
-      comments: this.comments.map((com) => {
-        return com.DTO;
-      })
-    };
+
 
 
   }

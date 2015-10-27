@@ -12,25 +12,37 @@ class TutorialSolution extends Actionable {
   }
 
   get DTO () {
-    return {
-      type: 'TutorialSolution',
-      id: this.id,
-      authorName: this.authorName,
-      authorUrl: this.authorUrl,
-      editorName: this.editorName,
-      editorUrl: this.editorUrl,
-      flags: this.flags,
-      score: this.tallyVotes(),
-      comments: this.comments.map((com) => {
-        if (com.DTO) {
-          return com.DTO;
-        } else {
-          return Comment.loadOne({_id: com})
-            .then((m) => m.DTO)
-            .catch((e) => Utils.Log.error(e));
-        }
-      })
-    }
+    return new Promise((resolve, reject) => {
+      var dto = {
+        type: 'TutorialSolution',
+        id: this.id,
+        authorName: this.authorName,
+        authorUrl: this.authorUrl,
+        editorName: this.editorName,
+        editorUrl: this.editorUrl,
+        flags: this.flags,
+        score: this.tallyVotes(),
+        comments: this.comments.map((com, i) => {
+          console.log('async start: comment', i+1, 'of', this.comments.length);
+          if (com.DTO) {
+            resolve(dto);
+            return com.DTO;
+          } else {
+            return Comment.loadOne({_id: com})
+              .then((m) => {
+                console.log('async done: comment', i+1, 'of', this.comments.length);
+                if (i === (this.comments.length - 1)) {
+                  console.log('comments done');
+                  resolve(dto);
+                }
+                return m.DTO
+              })
+              .catch(e => reject(e));
+          }
+        })
+      };
+    })
+
   }
 
   edit (editor, fields) {

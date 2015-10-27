@@ -12,7 +12,11 @@ exports.getAll = (M, res) => {
 
 exports.getById = (M, req, res) => {
   return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => res.json(m.DTO))
+    .then((m) => {
+      (m).DTO.then((mm) => {
+        res.json(mm);
+      }).catch(e => Utils.Log.error(e));
+    })
     .catch((e) => Utils.Log.error(e));
 };
 

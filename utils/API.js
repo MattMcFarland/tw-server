@@ -73,10 +73,24 @@ exports.getById = (M, req, res, Comment) => {
 };
 
 exports.addToDB = (M, req, res) => {
-  var create = (data) => M.create(Object.assign(data, {author: req.user}))
-    .save()
-    .then(doc => res.json(doc.DTO))
-    .catch(e => Utils.Log.error(e));
+  var create = (data) => {
+    var _tags, newdoc;
+
+    if (data.tags) {
+      _tags = _.clone(data.tags);
+    }
+
+    newdoc = M.create(Object.assign(data, {author: req.user}));
+    newdoc.save().then((nd) => {
+      if (_tags) {
+        nd.addOrEditTags(_tags)
+          .then(doc => res.json(doc.DTO))
+          .catch(e => Utils.Log.error(e));
+      } else {
+        res.json(nd.DTO);
+      }
+    }).catch(e => Utils.Log.error(e));
+  };
 
   if (req.body.title) {
     Utils.createPermalink(M, req.body.title)

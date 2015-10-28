@@ -47,16 +47,47 @@ class TutorialRequest extends Actionable {
         return com.DTO;
       }),
       removed: this.removed
-
-
     };
+  }
 
-
+  addOrEditTags (tags) {
+    var done = false;
+    return new Promise((resolve, reject) => {
+      this.tags = Array.isArray(this.tags) ? this.tags : [];
+      Utils.async.eachSeries(tags.split(','), (tagName, next) => {
+        Utils.async.setImmediate(() => {
+          var nTag, hasTag = _.find(this.tags, (obj) => obj._values.name === tagName);
+          if (done) {
+            next();
+          } else {
+            nTag = {
+              name: tagName,
+              last_used_date: Date.now()
+            };
+            Tag.loadOneAndUpdate({name: tagName}, nTag, {upsert: true}).then((tag) => {
+              tag.times_used = tag.times_used ? tag.times_used + 1 : 1;
+              if (!hasTag) {
+                this.tags.push(tag);
+              }
+              tag.save().then(() => {
+                this.save().then(() => {
+                  next();
+                }).catch((e) => reject(e));
+              }).catch((e) => reject(e));
+            });
+          }
+        });
+      }, () => {
+        done = true;
+        this.save()
+          .then((t) => resolve(t))
+          .catch((e) => reject(e));
+      });
+    });
   }
 
   edit (editor, fields) {
     return new Promise((resolve, reject) => {
-      var done = false;
       try {
         if (fields) {
           console.log('fields found', fields);
@@ -69,38 +100,8 @@ class TutorialRequest extends Actionable {
           this.title = fields.title ? Utils.xss(fields.title) : this.title;
 
           if (fields.tags) {
-            this.tags = Array.isArray(this.tags) ? this.tags : [];
-            Utils.async.eachSeries(fields.tags.split(','), (tagName, next) => {
-              Utils.async.setImmediate(() => {
-                var nTag;
-                if (done) {
-                  next();
-                } else {
-
-                  nTag = {
-                    name: tagName,
-                    last_used_date: Date.now()
-                  };
-
-                  Tag.loadOneAndUpdate({name: tagName}, nTag, {upsert: true}).then((tag) => {
-                    tag.times_used = tag.times_used ? tag.times_used + 1 : 1;
-                    if (tag.times_used === 1) {
-                      this.tags.push(tag);
-                    }
-                    tag.save().then(() => {
-                      this.save().then(() => {
-                        next();
-                      }).catch((e) => reject(e));
-                    }).catch((e) => reject(e));
-                  });
-                }
-              });
-            }, () => {
-              done = true;
-              this.save()
-                .then((t) => resolve(t))
-                .catch((e) => reject(e));
-            });
+            this.addOrEditTags(fields.tags)
+              .then((t) => resolve(t))
           } else {
             this.save()
               .then((t) => resolve(t))

@@ -1,8 +1,8 @@
 ## TODOS:
 
-- [ ] Finish Tags
-    - [ ]    approve/deny by moderator
-    - [ ]    edit by moderator / owner
+- [x] Finish Tags
+    - [x]    approve/deny by moderator
+    - [x]    edit by moderator / owner
 
 - [x] Finish Tutorial Requests
     - [x]    edit by moderator / owner
@@ -12,6 +12,6 @@
     - [x]    edit by moderator / owner
     - [x]    remove(undo) by moderator / owner
 
-- [ ] Finish Tutorial Comments
-    - [ ]    edit by moderator / owner
-    - [ ]    remove(undo) by moderator / owner
+- [x] Finish Tutorial Comments
+    - [x]    edit by moderator / owner
+    - [x]    remove(undo) by moderator / owner

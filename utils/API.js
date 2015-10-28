@@ -14,6 +14,7 @@ exports.getAll = (M, res, next) => {
 exports.getById = (M, req, res, next, Comment) => {
   return M.loadOne({_id: ObjectID(req.params.id)})
     .then((m) => {
+
       var
         done = false,
         solutions = _.clone(m.DTO.solutions),
@@ -62,12 +63,15 @@ exports.getById = (M, req, res, next, Comment) => {
             }
           }
         };
-
-      if (solutions && solutions.length) {
-        //Utils.Log.info('found ' + solutions.length + ' solutions');
-        loop();
-      } else {
-        res.json(m.DTO);
+      try {
+        if (solutions && solutions.length) {
+          //Utils.Log.info('found ' + solutions.length + ' solutions');
+          loop();
+        } else {
+          res.json(m.DTO);
+        }
+      } catch (err) {
+        next(Utils.error.badRequest(err));
       }
     })
     .catch((e) => next(Utils.error.badRequest(e)));
@@ -84,7 +88,7 @@ exports.addToDB = (M, req, res, next) => {
     newdoc = M.create(Object.assign(data, {author: req.user}));
     newdoc.save().then((nd) => {
       if (_tags) {
-        nd.addOrEditTags(_tags)
+        nd.addOrEditTags(_tags, req.user)
           .then(doc => res.json(doc.DTO))
           .catch(e => next(Utils.error.badRequest(e)));
       } else {
@@ -140,12 +144,16 @@ exports.addComment = (M, req, res, next) => {
 };
 
 exports.delete = (M, req, res, next) => {
-  return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => {
-      m.removeOrUndoRemove(req.user)
-        .then(doc => res.json(doc.DTO))
-        .catch(e => res.json(e))
-    }).catch(e => next(Utils.error.badRequest(e)));
+  try {
+    return M.loadOne({_id: ObjectID(req.params.id)})
+      .then((m) => {
+        m.removeOrUndoRemove(req.user)
+          .then(doc => res.json(doc.DTO))
+          .catch(e => res.json(e))
+      }).catch(e => next(Utils.error.badRequest(e)));
+  } catch(err) {
+    next(Utils.error.badRequest(err));
+  }
 };
 
 exports.addSolution = (M, req, res, next) => {
@@ -161,4 +169,14 @@ exports.getByPermalink = (M, req, res, next) => {
   return M.loadOne({permalink: req.body.permalink})
     .then((m) => res.json(m.DTO))
     .catch((e) => next(Utils.error.badRequest(e)));
+};
+
+
+exports.judgeTag = (M, req, res, next) => {
+  return M.loadOne({_id: ObjectID(req.params.id)})
+    .then((m) => {
+      m.approveOrDeny(req.body.decision)
+        .then(v => res.json(v))
+        .catch(e => res.json(e))
+    }).catch(e => next(Utils.error.badRequest(e)));
 };

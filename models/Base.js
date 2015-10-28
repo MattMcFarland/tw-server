@@ -70,6 +70,7 @@ class Base extends Document {
   }
 
   checkOwnership (uid) {
+    console.log('owner???', uid === Utils.Users.getId(this.author));
     return uid === Utils.Users.getId(this.author);
   }
 

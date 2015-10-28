@@ -16,10 +16,12 @@ class Middlewares {
   static authenticate(level, M, owner) {
 
     level || (level = 1);
-    owner || (owner = true);
+    owner = (typeof owner === "undefined") ? true : owner;
 
     return function (req, res, next) {
+      console.log(owner);
       var uid = Utils.Users.getId(req.user);
+      var id = req.params.id;
       var access = false;
       if (req.user) {
         if (req.user.groups && typeof req.user.groups.items &&
@@ -28,23 +30,28 @@ class Middlewares {
           req.usergroup = req.user.groups.items[0].name;
           req.accessLevel = req.usergroup === "user" ? 1 : req.usergroup === "moderator" ? 2 : req.usergroup === "admin" ? 3 : 0;
         }
+        console.log(req.accessLevel);
         access = (req.accessLevel >= level);
       }
       // check if access granted by user group.
       if (access) {
         next();
         // check if access granted by ownership.
-      }  else if (req.user && owner && req.params.id && M) {
+      }  else if (req.user && owner && id && M) {
+        console.log('check for ownership', id);
 
-        M.loadOne({_id: ObjectID(req.params.id)})
+        M.loadOne({_id: ObjectID(id)})
           .then((mod) => {
             if (mod.checkOwnership(uid)) {
               next();
             } else {
               next(Utils.error.forbidden());
             }
-          }).catch(next(Utils.error.badRequest(e)));
-      } else {
+          }).catch((e) => {
+            Utils.Log.error(e);
+            next(Utils.error.badRequest(e))
+          });
+      } else if (!access) {
         next(Utils.error.forbidden());
       }
     }

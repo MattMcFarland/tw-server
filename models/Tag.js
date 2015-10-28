@@ -23,38 +23,80 @@ class Tag extends Document {
 
   get DTO () {
     return {
+      id: this.id,
       name: this.name,
-      author: this.author,
-      editor: this.editor,
+      authorName: this.authorName,
+      authorUrl: this.authorUrl,
+      editorName: this.editorName,
+      editorUrl: this.editorUrl,
       is_pending: this.is_pending,
       is_approved: this.is_approved,
       removed: this.removed
-
     }
   }
-  approve (editor) {
+  get authorName () {
+    if (!this.author) {
+      return '';
+    }
+    return this.author.fullName;
+  }
+
+  get editorName () {
+    if (!this.editor) {
+      return '';
+    }
+    return this.editor.fullName;
+  }
+
+  get authorUrl () {
+    if (!this.author) {
+      return '';
+    }
+    return 'users/' + Utils.Users.getId(this.author);
+  }
+
+  get editorUrl () {
+    if (!this.editor) {
+      return '';
+    }
+    return 'users/' + Utils.Users.getId(this.editor);
+  }
+  approveOrDeny (decision) {
     return new Promise((resolve, reject) => {
-      this.updated_at = Date.now();
+      if (decision !== "deny" && decision !== "approve") {
+        reject("invalid decision must be approve or deny");
+      }
+      if (this.is_pending) {
+        this.is_pending = false;
+        this.is_approved = (decision === "approve");
+        this.save()
+          .then((i) => {
+            resolve({
+              "is_approved": this.is_approved,
+              "reason": "new"
+            });
+          }).catch((e) => reject(e));
+      } else {
+        resolve({
+          "is_approved": this.is_approved,
+          "reason": "not pending"
+        })
+      }
+    })
+  }
+
+
+  edit (editor, data) {
+    return new Promise((resolve, reject) => {
       this.editor = editor;
-      this.is_pending = false;
-      this.is_approved = true;
+      this.updated_at = Date.now();
+      this.name = data.name;
       this.save()
-        .then((tag) => resolve(tag))
+        .then(tag => resolve(tag))
         .catch((e) => reject(e))
     });
   }
 
-  deny (editor) {
-    return new Promise((resolve, reject) => {
-      this.updated_at = Date.now();
-      this.editor = editor;
-      this.is_pending = false;
-      this.is_approved = false;
-      this.save()
-        .then((tag) => resolve(tag))
-        .catch((e) => reject(e))
-    });
-  }
 
   removeOrUndoRemove (editor) {
     return new Promise((resolve, reject) => {

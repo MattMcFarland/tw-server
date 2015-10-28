@@ -1,33 +1,23 @@
-const Utils = ('./index');
+
 exports.badRequest = function (info) {
-  Utils.Log.error(info);
-  return {
-    name: "BadRequest",
-    info: info || "Bad Request",
-    status: 400
-  };
+  var err = new Error('BadRequest');
+  err.status = 400;
+  return(err);
 };
 
 
 exports.forbidden = function (info) {
-  Utils.Log.error(info);
-  return {
-    name: "Forbidden",
-    info: info || "Authentication Failure",
-    status: 403
-  };
+  var err = new Error('forbidden');
+  err.status = 403;
+  return(err);
 };
 
 
 exports.notFound = function (info) {
-  Utils.Log.error(info);
-  return {
-    name: "NotFound",
-    info: info || "Not Found",
-    status: 404
-  };
+  var err = new Error('notFound');
+  err.status = 404;
+  return(err);
 };
-
 
 
 

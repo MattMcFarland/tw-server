@@ -1,5 +1,6 @@
 const
   api = require('express').Router(),
+  Tag = require('../models/Tag'),
   TutorialRequest = require('../models/TutorialRequest'),
   TutorialSolution = require('../models/TutorialSolution'),
   Comment = require('../models/Comment'),
@@ -14,25 +15,27 @@ function createEndpoints(path, model) {
   api.get(path + '/:id', (req, res, next) =>
     Utils.API.getById(model, req, res, next, Comment));
 
-  api.post(path, MW.fauxUser(5), MW.authenticate(1),  (req, res, next) =>
+  api.post(path, MW.authenticate(1),  (req, res, next) =>
     Utils.API.addToDB(model, req, res, next));
 
-  api.put(path + '/:id',  MW.fauxUser(5), MW.authenticate(2, model),  (req, res, next) =>
+  api.put(path + '/:id', MW.authenticate(2, model),  (req, res, next) =>
     Utils.API.update(model, req, res, next));
 
-  api.put(path + '/:id/flag',  MW.fauxUser(5), MW.authenticate(1, model),  (req, res, next) =>
+  api.put(path + '/:id/flag', MW.authenticate(1, model),  (req, res, next) =>
     Utils.API.flag(model, req, res, next));
 
-  api.put(path + '/:id/vote',  MW.fauxUser(5), MW.authenticate(1, model),  (req, res, next) =>
+  api.put(path + '/:id/vote', MW.authenticate(1, model),  (req, res, next) =>
     Utils.API.vote(model, req, res, next));
 
-  api.put(path + '/:id/comment',  MW.fauxUser(5), MW.authenticate(1, model),  (req, res, next) =>
+  api.put(path + '/:id/comment', MW.authenticate(1, model),  (req, res, next) =>
     Utils.API.addComment(model, req, res, next));
 
-  api.delete(path + '/:id',  MW.fauxUser(5), MW.authenticate(2, model),  (req, res, next) =>
+  api.delete(path + '/:id', MW.authenticate(2, model),  (req, res, next) =>
     Utils.API.delete(model, req, res, next));
 }
 
+/** Add or remove faux user here */
+api.use(MW.fauxUser(1));
 
 createEndpoints('/tutorial-requests', TutorialRequest);
 createEndpoints('/tutorial-solutions', TutorialSolution);
@@ -40,7 +43,7 @@ createEndpoints('/comments', Comment);
 
 
 api.put('/tutorial-requests/:id/solution',
-  MW.fauxUser(5), MW.authenticate(1), (req, res, next) =>
+ MW.authenticate(1, TutorialRequest), (req, res, next) =>
     Utils.API.addSolution(TutorialRequest, req, res, next)
 );
 
@@ -48,22 +51,28 @@ api.get('/tutorial-requests/:permalink', (req, res, next) =>
     Utils.API.getByPermalink(TutorialRequest, req, res, next)
 );
 
+api.get('/tags/:id', (req, res, next) =>
+    Utils.API.getById(Tag, req, res, next)
+);
 
-api.use((err, req, res, next) => {
-  var data;
-  if (err.status) {
-    data = Object.assign(err, {
-      method: req.method,
-      url: req.protocol + '://' + req.get('host') + req.originalUrl,
-      request: {
-        body: req.body || {},
-        params: req.params || {} }
-    });
-    res.status(err.status).json(data);
-  } else {
-    next();
-  }
+api.put('/tags/:id',
+  MW.authenticate(2, Tag), (req, res, next) =>
+    Utils.API.update(Tag, req, res, next)
+);
 
-});
+api.delete('/tags/:id',
+  MW.authenticate(2, Tag), (req, res, next) =>
+    Utils.API.delete(Tag, req, res, next)
+);
+
+api.put('/tags/:id/judge',
+  MW.authenticate(2, Tag, false), (req, res, next) =>
+    Utils.API.judgeTag(Tag, req, res, next)
+);
+
+
+
+
+
 
 module.exports = api;

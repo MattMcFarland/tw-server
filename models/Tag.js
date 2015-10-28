@@ -8,11 +8,11 @@ class Tag extends Document {
   constructor() {
     super('tags');
     this.schema({
-      times_used: { type: Number},
+      times_used: { type: Number, default: 1},
       name: {type: String },
-      last_used_date: String,
-      created_at: { type: String, default: Date.now },
-      updated_at: { type: String, default: Date.now },
+      last_used_date: { type: Date, default: Date.now },
+      created_at: { type: Date, default: Date.now },
+      updated_at: { type: Date, default: Date.now },
       author: {type: Object },
       editor: {type: Object },
       is_pending: { type: Boolean, default: true },

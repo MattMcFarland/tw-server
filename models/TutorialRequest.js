@@ -31,7 +31,7 @@ class TutorialRequest extends Actionable {
       permalink: this.permalink,
       content: this.content,
       tags: this.tags.map((tag) => {
-        return tag.name;
+        return tag.DTO;
       }),
       linkMeta: this.linkMeta,
       authorName: this.authorName,

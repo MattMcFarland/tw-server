@@ -21,6 +21,17 @@ class Tag extends Document {
     });
   }
 
+  get DTO () {
+    return {
+      name: this.name,
+      author: this.author,
+      editor: this.editor,
+      is_pending: this.is_pending,
+      is_approved: this.is_approved,
+      removed: this.removed
+
+    }
+  }
   approve (editor) {
     return new Promise((resolve, reject) => {
       this.updated_at = Date.now();

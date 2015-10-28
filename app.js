@@ -2,6 +2,7 @@
 const
   bodyParser = require('body-parser'),
   compression = require('compression'),
+  timeout = require('connect-timeout'),
   cookieParser = require('cookie-parser'),
   express = require('express'),
   favicon = require('serve-favicon'),
@@ -12,9 +13,14 @@ const
 
 // App Modules
 const
+  Utils = require('./utils'),
   app   = express(),
   api   = require('./routes/api'),
   index = require('./routes/index');
+
+app.use(timeout('5s'));
+
+app.use(Utils.Middlewares.timeOut());
 
 app.use(stormpath.init(app, {
   application: "https://api.stormpath.com/v1/applications/5Bi5Y8savIbPgT8JX8nYwO",
@@ -33,8 +39,7 @@ camo.connect(
     console.log('Connected to database...');
 });
 
-app.use(compression({level:9}));
-
+app.use(compression({level:7}));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
@@ -49,6 +54,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/@mattmcfarland/tw-client/dist')));
 
 app.use('/', index);
+
 app.use('/api', api);
 /*
 app.use(usergroup);
@@ -79,6 +85,8 @@ app.use((req, res, next) => {
 // will print stacktrace
 if (app.get('env') === 'development') {
   app.use((err, req, res) => {
+
+    console.log(err);
     res.status(err.status || 500);
     res.send("error", {
       status: err.status || 500,
@@ -89,6 +97,7 @@ if (app.get('env') === 'development') {
       message: err.message,
       error: err
     });
+
   });
 }
 
@@ -102,5 +111,6 @@ app.use((err, req, res) => {
     error: {}
   });
 });
+
 
 module.exports = app;

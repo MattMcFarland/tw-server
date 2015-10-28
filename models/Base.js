@@ -29,8 +29,6 @@ class Base extends Document {
 
   }
 
-
-
   get flags () {
     return {
       spam: this.countFlags('spam'),
@@ -69,6 +67,10 @@ class Base extends Document {
 
   countFlags (flagType) {
     return _.countBy(this.flaggers, {type: flagType}).true || 0;
+  }
+
+  checkOwnership (uid) {
+    return uid === Utils.Users.getId(this.author);
   }
 
   addOrRemoveFlag (user, flagType) {

@@ -1,28 +1,31 @@
-
+const Utils = ('./index');
 exports.badRequest = function (info) {
-  var err = new Error("Bad Request");
-  err.info = info || "";
-  err.status = 400;
-  console.log(err);
-  return err;
+  Utils.Log.error(info);
+  return {
+    name: "BadRequest",
+    info: info || "Bad Request",
+    status: 400
+  };
 };
 
 
 exports.forbidden = function (info) {
-  var err = new Error("Forbidden");
-  err.info = info || "";
-  err.status = 403;
-  console.log(err);
-  return err;
+  Utils.Log.error(info);
+  return {
+    name: "Forbidden",
+    info: info || "Authentication Failure",
+    status: 403
+  };
 };
 
 
 exports.notFound = function (info) {
-  var err = new Error("NotFound");
-  err.info = info || "";
-  err.status = 404;
-  console.log(err);
-  return err;
+  Utils.Log.error(info);
+  return {
+    name: "NotFound",
+    info: info || "Not Found",
+    status: 404
+  };
 };
 
 
@@ -36,6 +39,5 @@ exports.misc = function (name, code, info) {
   var err = new Error(name);
   err.info = info || "";
   err.status = code;
-  console.log(err);
   return err;
 };

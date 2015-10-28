@@ -1,7 +1,7 @@
 const request = require('supertest');
 const expect = require('chai').expect;
-const tutRequestId = '562d09df82658d19596b51bc';
-const commentId = '562d0a8c2c80e35b5902b1dc';
+const tutRequestId = '56306a0612ecf2bd76fb56fe';
+const commentId = '56309ff7b71ea8e27bb68c8e';
 const tutSolutionId = '562d0b212c80e35b5902b1e1';
 
 describe('PUT /api/tutorial-requests/:id/comment', () => {

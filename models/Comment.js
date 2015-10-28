@@ -17,6 +17,8 @@ class Comment extends Base {
       authorUrl: this.authorUrl,
       editorName: this.editorName,
       editorUrl: this.editorUrl,
+      created_at: this.created_at,
+      updated_at: this.updated_at,
       message: this.message,
       flags: this.flags,
       score: this.tallyVotes()

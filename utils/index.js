@@ -8,4 +8,5 @@ exports.async = require('async');
 exports.API = require('./API');
 exports.error = require('./error');
 exports.Middlewares = require('./Middlewares');
+exports.Generator = require('./Generator');
 exports.createPermalink = require('./createPermalink');

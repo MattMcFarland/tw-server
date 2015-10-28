@@ -11,7 +11,7 @@ function createEndpoints(path, model) {
     Utils.API.getAll(model, res));
 
   api.get(path + '/:id', (req, res) =>
-    Utils.API.getById(model, req, res));
+    Utils.API.getById(model, req, res, Comment));
 
   api.post(path,  Utils.Middlewares.authenticate,  (req, res) =>
     Utils.API.addToDB(model, req, res));

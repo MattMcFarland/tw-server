@@ -9,6 +9,7 @@ class TutorialSolution extends Actionable {
   constructor() {
     super('tutorialsolutions');
     this.linkMeta = {type: Object};
+    this.processing = {type: Boolean};
   }
 
   get DTO () {
@@ -22,13 +23,7 @@ class TutorialSolution extends Actionable {
       flags: this.flags,
       score: this.tallyVotes(),
       comments: this.comments.map((com) => {
-        if (com.DTO) {
-          return com.DTO;
-        } else {
-          return Comment.loadOne({_id: com})
-            .then((m) => m.DTO)
-            .catch((e) => Utils.Log.error(e));
-        }
+        return com.DTO ? com.DTO : com;
       })
     }
   }

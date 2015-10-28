@@ -1,6 +1,7 @@
 "use strict";
 
 const
+  _ = require('lodash'),
   Utils = require('./index'),
   ObjectID = require('mongodb').ObjectID;
 
@@ -10,17 +11,72 @@ exports.getAll = (M, res) => {
     .catch((e) => Utils.Log.error(e));
 };
 
-exports.getById = (M, req, res) => {
+exports.getById = (M, req, res, Comment) => {
   return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => res.json(m.DTO))
+    .then((m) => {
+      var
+        done = false,
+        solutions = _.clone(m.DTO.solutions),
+        commentsLoaded = false,
+        loop = (solIndex) => {
+          var
+            index = solIndex || 0,
+            sol = solutions[index],
+            j = 0;
+
+          if (sol && sol.comments && sol.comments.length) {
+            if (!sol.processing) {
+              j = 0;
+              sol.processing = true;
+              //console.log('solution [' + index + '] has', sol.comments.length, 'comment(s)');
+              sol.xcomments = Promise.all(sol.comments.map((c, i) => {
+                //console.log('get comment', c);
+                return Comment.loadOne({_id: c});
+              })).then((g) => {
+                commentsLoaded = true;
+                sol.comments = g.map((com) => {
+                  return com.DTO;
+                });
+
+                //console.log(g.length, 'comments loaded');
+                if (done) {
+                  res.json(Object.assign(m.DTO, {solutions}));
+                }
+              })
+            } else if (done) {
+              //console.log('but we done');
+            } else {
+              //console.log('waiting...');
+            }
+          } else {
+            commentsLoaded = true;
+            //console.log('solution [' + index + '] has no comment(s)');
+          }
+          if (!commentsLoaded) {
+            _.defer(loop, 500);
+          } else {
+            if (index >= solutions.length - 1) {
+              done = true;
+            } else {
+              loop(index + 1);
+            }
+          }
+        };
+      if (solutions.length) {
+        //Utils.Log.info('found ' + solutions.length + ' solutions');
+        loop();
+      } else {
+        res.json(m.DTO);
+      }
+    })
     .catch((e) => Utils.Log.error(e));
 };
 
 exports.addToDB = (M, req, res) => {
   var create = (data) => M.create(Object.assign(data, {author: req.user}))
-      .save()
-      .then(doc => res.json(doc.DTO))
-      .catch(e => Utils.Log.error(e));
+    .save()
+    .then(doc => res.json(doc.DTO))
+    .catch(e => Utils.Log.error(e));
 
   if (req.body.title) {
     Utils.createPermalink(M, req.body.title)

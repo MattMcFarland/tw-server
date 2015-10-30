@@ -38,9 +38,9 @@ class Middlewares {
         next();
         // check if access granted by ownership.
       }  else if (req.user && owner && id && M) {
-        console.log('check for ownership', id);
+        //console.log('check for ownership', id);
 
-        M.loadOne({_id: ObjectID(id)})
+        M.findById(id)
           .then((mod) => {
             if (mod.checkOwnership(uid)) {
               next();

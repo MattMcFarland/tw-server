@@ -1,40 +1,50 @@
 "use strict";
+const Utils = require('../utils');
 
-const Base = require('./Base');
+module.exports = Utils.ModelFactory.fabricate({
+  name: 'Comment',
+  type: 'comment',
+  props: {
+    message: {type: String, required: true }
+  },
+  methods: {
+    DTO () {
+      return {
+        type: 'Comment',
+        id: this._id,
+        authorName: this.getAuthorName(),
+        authorUrl: this.getAuthorUrl(),
+        editorName: this.getEditorName(),
+        editorUrl: this.getEditorUrl(),
+        created_at: this.created_at,
+        updated_at: this.updated_at,
+        message: this.message,
+        flags: this.getFlags(),
+        score: this.tallyVotes()
+      }
+    },
+    edit (data) {
+      return new Promise((resolve, reject) => {
+        if (data) {
+          console.log('data found', data);
 
-class Comment extends Base {
-  constructor() {
-    super('comments');
-    this.message = String;
-    this.comments = [Comment];
-  }
+          this.editor = data.editor;
+          this.updated_at = Date.now();
+          this.message = data.message ? Utils.xss(data.message) : this.message;
 
-  get DTO () {
-    return {
-      type: 'Comment',
-      id: this.id,
-      authorName: this.authorName,
-      authorUrl: this.authorUrl,
-      editorName: this.editorName,
-      editorUrl: this.editorUrl,
-      created_at: this.created_at,
-      updated_at: this.updated_at,
-      message: this.message,
-      flags: this.flags,
-      score: this.tallyVotes()
+          this.save((err, doc) => {
+            if (err) {
+              reject(err);
+            } else if (doc) {
+              resolve(doc);
+            } else {
+              reject('404');
+            }
+          })
+        } else {
+          reject("invalid data");
+        }
+      });
     }
   }
-
-  edit (editor, data) {
-    return new Promise((resolve, reject) => {
-      this.editor = editor;
-      this.updated_at = Date.now();
-      this.message = data.message;
-      this.save()
-        .then(comment => resolve(comment))
-        .catch((e) => reject(e))
-    });
-  }
-}
-
-module.exports = Comment;
+});

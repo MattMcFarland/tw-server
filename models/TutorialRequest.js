@@ -1,139 +1,119 @@
 "use strict";
 const
-  _ = require('lodash'),
-  Actionable  = require('./Actionable'),
-  Solution    = require('./TutorialSolution'),
-  Comment     = require('./Comment'),
-  Tag         = require('./Tag'),
-  Utils       = require('../utils'),
-  ObjectID = require('mongodb').ObjectID;
+  _             = require('lodash'),
+  mongoose      = require('mongoose'),
+  Schema        = mongoose.Schema,
+  Solution      = require('./TutorialSolution'),
+  Comment       = require('./Comment'),
+  Tag           = require('./Tag'),
+  Utils         = require('../utils');
 
-class TutorialRequest extends Actionable {
+module.exports = Utils.ModelFactory.fabricate({
+  name: 'TutorialRequest',
+  type: 'tutorialRequest',
+  props: {
+    title: {type: String},
+    content: {type: String},
+    engine:    { type: String },
+    version:   { type: String },
+    permalink: { type: String },
+    tags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
+    solutions: [{ type: Schema.Types.ObjectId, ref: 'TutorialSolution' }]
+  },
+  methods: {
+    DTO () {
+      return {
+        type: "TutorialRequest",
+        id: this.id,
+        engine: this.engine,
+        version: this.version,
+        created_at: this.created_at,
+        updated_at: this.updated_at,
+        title: this.title,
+        permalink: this.permalink,
+        content: this.content,
+        tags: this.tags.map((tag) => {
+          console.log('tag???', tag)
+          return tag.DTO ? tag.DTO() : tag;
+        }),
+        authorName: this.getAuthorName(),
+        authorUrl: this.getAuthorUrl(),
+        editorName: this.getEditorName(),
+        editorUrl: this.getEditorUrl(),
+        flags: this.getFlags(),
+        score: this.score || 0,
+        solutions: this.solutions.map((sol) => {
+          return sol.DTO ? sol.DTO() : sol;
+        }),
+        comments: this.comments.map((com) => {
+          return com.DTO ? com.DTO() : com;
+        }),
+        removed: this.removed
+      };
+    },
 
-  constructor() {
-    super('tutorialrequests');
-    this.engine = String;
-    this.version = String;
-    this.solutions = [Solution];
-    this.tags = [Tag];
-    this.permalink = String;
-  }
-  get DTO () {
+    edit (data) {
+      return new Promise((resolve, reject) => {
+          if (data) {
+            console.log('data found', data);
 
-    return {
-      type: "TutorialRequest",
-      id: this.id,
-      engine: this.engine,
-      version: this.version,
-      created_at: this.created_at,
-      updated_at: this.updated_at,
-      title: this.title,
-      permalink: this.permalink,
-      content: this.content,
-      tags: this.tags.map((tag) => {
-        return tag.DTO;
-      }),
-      linkMeta: this.linkMeta,
-      authorName: this.authorName,
-      authorUrl: this.authorUrl,
-      editorName: this.editorName,
-      editorUrl: this.editorUrl,
-      flags: this.flags,
-      score: this.tallyVotes(),
-      solutions: this.solutions.map((sol) => {
-        return sol.DTO;
-      }),
-      comments: this.comments.map((com) => {
-        return com.DTO;
-      }),
-      removed: this.removed
-    };
-  }
+            this.editor = data.editor;
+            this.updated_at = Date.now();
+            this.content = data.content ? Utils.xss(data.content) : this.content;
+            this.engine = data.engine ? Utils.xss(data.engine) : this.engine;
+            this.version = data.version ? Utils.xss(data.version) : this.version;
+            this.title = data.title ? Utils.xss(data.title) : this.title;
+            this.tags = data.tags ? data.tags : this.tags;
 
-  addOrEditTags (tags, user) {
-    var done = false;
-    return new Promise((resolve, reject) => {
-      this.tags = [];
-      Utils.async.eachSeries(tags.split(','), (tagName, next) => {
-        Utils.async.setImmediate(() => {
-          var nTag, hasTag = _.find(this.tags, (obj) => obj._values.name === tagName);
-          if (done) {
-            next();
+              this.save((err, doc) => {
+                if (err) {
+                  reject(err);
+                } else if (doc) {
+                  resolve(doc);
+                } else {
+                  reject('404');
+                }
+              })
           } else {
-            nTag = {
-              name: tagName,
-              last_used_date: Date.now()
-            };
-            Tag.loadOneAndUpdate({name: tagName}, nTag, {upsert: true}).then((tag) => {
-              tag.times_used = tag.times_used ? tag.times_used + 1 : 1;
-              if (!hasTag) {
-                this.tags.push(tag);
-              }
-              if (tag.times_used === 1) {
-                tag.author = user ? user : '';
-              }
-              tag.save().then(() => {
-                this.save().then(() => {
-                  next();
-                }).catch((e) => reject(e));
-              }).catch((e) => reject(e));
-            });
+            reject("invalid data");
           }
-        });
-      }, () => {
-        done = true;
-        this.save()
-          .then((t) => resolve(t))
-          .catch((e) => reject(e));
       });
-    });
+    },
+    addSolution (author, data) {
+      return new Promise((resolve, reject) => {
+        var newSolution = new Solution();
+        newSolution.author = author;
+        newSolution.linkMeta = data.linkMeta;
+        newSolution.content = Utils.xss(data.content);
+        newSolution.save()
+          .then((sol) => {
+            return this.solutions.push(sol);
+          })
+          .then((sol) => {
+            return this.save()
+          })
+          .then((sol) => {
+            resolve(newSolution)
+          })
+      });
+    },
+
+    addComment (author, message) {
+      return new Promise((resolve, reject) => {
+        var newComment = new Comment();
+        newComment.author = author;
+        newComment.message = Utils.xss(message);
+        newComment.save()
+          .then((com) => {
+            return this.comments.push(com);
+          })
+          .then((com) => {
+            return this.save()
+          })
+          .then((com) => {
+            resolve(newComment)
+          })
+      });
+    }
   }
-
-  edit (editor, fields) {
-    return new Promise((resolve, reject) => {
-      try {
-        if (fields) {
-          console.log('fields found', fields);
-
-          this.editor = editor;
-          this.updated_at = Date.now();
-          this.content = fields.content ? Utils.xss(fields.content) : this.content;
-          this.engine = fields.engine ? Utils.xss(fields.engine) : this.engine;
-          this.version = fields.version ? Utils.xss(fields.version) : this.version;
-          this.title = fields.title ? Utils.xss(fields.title) : this.title;
-
-          if (fields.tags) {
-            this.addOrEditTags(fields.tags, editor)
-              .then((t) => resolve(t))
-          } else {
-            this.save()
-              .then((t) => resolve(t))
-              .catch((e) => reject(e));
-          }
-        } else {
-          reject("invalid fields");
-        }
-      } catch(e) {
-        reject(e);
-      }
-    });
-  }
-
-  addSolution (author, data) {
-    return new Promise((resolve, reject) => {
-      Solution.create({
-        author,
-        linkMeta: data.linkMeta,
-        content: Utils.xss(data.content)
-      }).save().then((solution) => {
-        this.solutions.push(solution);
-        this.save()
-          .then((s) => resolve(s))
-          .catch((e) => reject(e));
-      }).catch((e) => reject(e));
-    });
-  }
-
-}
-
-module.exports = TutorialRequest;
+});

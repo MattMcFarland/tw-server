@@ -4,7 +4,7 @@ module.exports = function (M, text) {
   return new Promise((resolve, reject) => {
     var linkName = Utils.xss(Utils.sanitize(text.toLowerCase().replace(/\s/g, '-')));
     (function loop() {
-      M.loadOne({permalink:linkName})
+      M.findOne({permalink:linkName})
         .then((m) => {
           if (m) {
             if (/.*-([\d]*)$/.test(linkName)) {

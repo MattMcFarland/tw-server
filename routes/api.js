@@ -10,7 +10,7 @@ const
 function createEndpoints(path, model) {
 
   api.get(path, (req, res, next) =>
-    Utils.API.getAll(model, res, next));
+    Utils.API.getAll(model, req, res, next));
 
   api.get(path + '/:id', (req, res, next) =>
     Utils.API.getById(model, req, res, next, Comment));
@@ -35,11 +35,14 @@ function createEndpoints(path, model) {
 }
 
 /** Add or remove faux user here */
-api.use(MW.fauxUser(1));
+api.use(MW.fauxUser(2));
 
 createEndpoints('/tutorial-requests', TutorialRequest);
 createEndpoints('/tutorial-solutions', TutorialSolution);
 createEndpoints('/comments', Comment);
+
+
+
 
 
 api.put('/tutorial-requests/:id/solution',
@@ -47,7 +50,7 @@ api.put('/tutorial-requests/:id/solution',
     Utils.API.addSolution(TutorialRequest, req, res, next)
 );
 
-api.get('/tutorial-requests/:permalink', (req, res, next) =>
+api.get('/tutorial-requests/permalink/:permalink', (req, res, next) =>
     Utils.API.getByPermalink(TutorialRequest, req, res, next)
 );
 
@@ -72,7 +75,12 @@ api.put('/tags/:id/judge',
 
 
 
-
-
+api.use((req, res, next) => {
+  if (req.payload) {
+    res.json(req.payload);
+  } else {
+    next();
+  }
+})
 
 module.exports = api;

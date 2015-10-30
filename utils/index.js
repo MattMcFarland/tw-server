@@ -10,3 +10,5 @@ exports.error = require('./error');
 exports.Middlewares = require('./Middlewares');
 exports.Generator = require('./Generator');
 exports.createPermalink = require('./createPermalink');
+exports.createOrEditTags = require('./createOrEditTags');
+exports.ModelFactory = require('./ModelFactory');

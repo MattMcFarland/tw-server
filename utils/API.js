@@ -3,180 +3,270 @@
 const
   _ = require('lodash'),
   Utils = require('./index'),
-  ObjectID = require('mongodb').ObjectID;
+  Tag = require('../models/Tag');
 
-exports.getAll = (M, res, next) => {
-  return M.loadMany()
-    .then((array) => res.json(array.map( m => m.DTO )))
-    .catch((e) => next(Utils.error.badRequest(e)));
+exports.getAll = (M, req, res, next) => {
+  var query = {
+    removed: { $ne: true }
+  }
+  if (req.query.showpositive) {
+    query.score = { $gt: 0 }
+  }
+  if (req.query.$where) {
+    query.$where = req.query.$where
+  }
+
+  return M.find(query)
+    .sort({created_at: -1})
+    .populate('tags')
+    .populate('solutions')
+    .populate('comments')
+    .exec((err, data) => {
+      if (err) {
+        Utils.Log.error(err);
+        Utils.error.badRequest(err);
+      } else {
+        req.payload = data.map(m => m.DTO());
+        next();
+      }
+    })
 };
 
 exports.getById = (M, req, res, next, Comment) => {
-  return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => {
-
-      var
-        done = false,
-        solutions = _.clone(m.DTO.solutions),
-        commentsLoaded = false,
-        loop = (solIndex) => {
-          var
-            index = solIndex || 0,
-            sol = solutions[index],
-            j = 0;
-
-          if (sol && sol.comments && sol.comments.length) {
-            if (!sol.processing) {
-              j = 0;
-              sol.processing = true;
-              //console.log('solution [' + index + '] has', sol.comments.length, 'comment(s)');
-              sol.xcomments = Promise.all(sol.comments.map((c, i) => {
-                //console.log('get comment', c);
-                return Comment.loadOne({_id: c});
-              })).then((g) => {
-                commentsLoaded = true;
-                sol.comments = g.map((com) => {
-                  return com.DTO;
-                });
-
-                //console.log(g.length, 'comments loaded');
-                if (done) {
-                  res.json(Object.assign(m.DTO, {solutions}));
-                }
-              })
-            } else if (done) {
-              //console.log('but we done');
-            } else {
-              //console.log('waiting...');
-            }
-          } else {
-            commentsLoaded = true;
-            //console.log('solution [' + index + '] has no comment(s)');
-          }
-          if (!commentsLoaded) {
-            _.defer(loop, 500);
-          } else {
-            if (solutions && index >= solutions.length - 1) {
-              done = true;
-            } else {
-              loop(index + 1);
-            }
-          }
-        };
-      try {
-        if (solutions && solutions.length) {
-          //Utils.Log.info('found ' + solutions.length + ' solutions');
-          loop();
-        } else {
-          res.json(m.DTO);
-        }
-      } catch (err) {
-        next(Utils.error.badRequest(err));
+  return M.findOne({_id: req.params.id})
+    .populate('comments')
+    .populate('solutions')
+    .populate('tags')
+    .exec((err, model) => {
+      if (err) {
+        Utils.Log.error(err);
+        Utils.error.badRequest(err);
+      } else {
+        req.payload = model.DTO();
+        next();
       }
     })
-    .catch((e) => next(Utils.error.badRequest(e)));
 };
 
 exports.addToDB = (M, req, res, next) => {
+
+  // DRY error handler
+  var abort = (e) => {
+    Utils.Log.error(e);
+    next(Utils.error.badRequest(e))
+  }
+
   var create = (data) => {
-    var _tags, newdoc;
-
-    if (data.tags) {
-      _tags = _.clone(data.tags);
-    }
-
-    newdoc = M.create(Object.assign(data, {author: req.user}));
-    newdoc.save().then((nd) => {
-      if (_tags) {
-        nd.addOrEditTags(_tags, req.user)
-          .then(doc => res.json(doc.DTO))
-          .catch(e => next(Utils.error.badRequest(e)));
-      } else {
-        res.json(nd.DTO);
-      }
-    }).catch(e => next(Utils.error.badRequest(e)));
+      console.log('creating new data', data);
+      M.create(data, (err, nd) => {
+        if (err) {
+          abort(err);
+        } else {
+          req.payload = nd.DTO();
+          next();
+        }
+      })
   };
 
   if (req.body.title) {
     Utils.createPermalink(M, req.body.title)
       .then((permalink) => {
-        return create(Object.assign(req.body, { permalink }));
-      }).catch(e => next(Utils.error.badRequest(e)));
+
+        if (req.body.tags) {
+
+          Utils.createOrEditTags(req.body.tags).then((tags) => {
+            req.body.tags = [].concat(tags);
+            return create(Object.assign(
+              req.body,
+              {
+                author: req.user,
+                permalink
+              }
+            ));
+          }).catch(abort)
+
+        } else {
+          return create(Object.assign(
+            req.body,
+            {
+              author: req.user,
+              permalink
+            }
+          ));
+        }
+
+      }).catch(abort)
+
   } else {
     return create(req.body);
   }
 };
 
 exports.update = (M, req, res, next) => {
-  return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => {
-      m.edit(req.user, req.body)
-        .then(doc => res.json(doc.DTO))
-        .catch(e => res.json(e))
-    }).catch(e => next(Utils.error.badRequest(e)));
+
+  var abort = (e) => {
+    Utils.Log.error(e);
+    next(Utils.error.badRequest(e))
+  }
+
+  return M.findById(req.params.id).populate('tags')
+    .exec((err, doc) => {
+
+      var doUpdate = (data) => {
+        console.log('updating data', data);
+        doc.edit(data).then((nd) => {
+          req.payload = nd.DTO();
+          next();
+        })
+      };
+
+      if (err) {
+        abort(err);
+      } else {
+        if (req.body.tags) {
+
+          Utils.createOrEditTags(req.body.tags).then((tags) => {
+            req.body.tags = [].concat(tags);
+            return doUpdate(Object.assign(
+              req.body,
+              {
+                editor: req.user,
+              }
+            ));
+          }).catch(abort)
+
+        } else {
+          return doUpdate(Object.assign(
+            req.body,
+            {
+              editor: req.user,
+            }
+          ));
+        }
+      }
+    })
 };
 
 exports.flag = (M, req, res, next) => {
-  return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => {
-      m.addOrRemoveFlag(req.user, req.body.flagType)
-        .then(f => res.json(f))
-        .catch(e => res.json(e))
-    }).catch(e => next(Utils.error.badRequest(e)));
+  return M.findById(req.params.id)
+    .exec((err, doc) => {
+      if (err) {
+        Utils.Log.error(err);
+        Utils.error.badRequest(err);
+      } else {
+        doc.addOrRemoveFlag(req.user, req.body.flagType)
+          .then(f => {
+            req.payload = f;
+            next();
+          })
+          .catch(e => next(Utils.error.badRequest(e)))
+      }
+    })
 };
 
 exports.vote = (M, req, res, next) => {
-  return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => {
-      m.createOrUpdateVote(req.user, req.body.direction)
-        .then(v => res.json(v))
-        .catch(e => res.json(e))
-    }).catch(e => next(Utils.error.badRequest(e)));
+  return M.findById(req.params.id)
+    .exec((err, doc) => {
+      if (err) {
+        Utils.Log.error(err);
+        Utils.error.badRequest(err);
+      } else {
+        doc.createOrUpdateVote(req.user, req.body.direction)
+          .then(v => {
+            console.log('here be the v', v);
+            req.payload = v;
+            next();
+          })
+          .catch(e => {
+            Utils.Log.error(e);
+            next(Utils.error.badRequest(e))
+          })
+      }
+    })
 };
 
 exports.addComment = (M, req, res, next) => {
-  return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => {
-      m.addComment(req.user, req.body.message)
-        .then(com => res.json(com.DTO))
-        .catch(e => res.json(e))
-    }).catch(e => next(Utils.error.badRequest(e)));
+  return M.findById(req.params.id)
+    .exec((err, doc) => {
+      if (err) {
+        Utils.Log.error(err);
+        Utils.error.badRequest(err);
+      } else {
+        doc.addComment(req.user, req.body.message)
+          .then(doc => {
+            req.payload = doc.DTO();
+            next();
+          })
+          .catch(e => {
+            Utils.Log.error(e);
+            next(Utils.error.badRequest(e))
+          })
+      }
+    })
 };
 
 exports.delete = (M, req, res, next) => {
-  try {
-    return M.loadOne({_id: ObjectID(req.params.id)})
-      .then((m) => {
-        m.removeOrUndoRemove(req.user)
-          .then(doc => res.json(doc.DTO))
-          .catch(e => res.json(e))
-      }).catch(e => next(Utils.error.badRequest(e)));
-  } catch(err) {
-    next(Utils.error.badRequest(err));
-  }
+    return M.findById(req.params.id)
+      .exec((err, doc) => {
+        if (err) {
+          Utils.Log.error(err);
+          Utils.error.badRequest(err);
+        } else {
+          doc.removeOrUndoRemove(req.user, req.body.message)
+            .then(doc => {
+              req.payload = doc.DTO();
+              next();
+            })
+            .catch(e => next(Utils.error.badRequest(e)))
+        }
+      })
+
 };
 
 exports.addSolution = (M, req, res, next) => {
-  return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => {
-      m.addSolution(req.user, req.body)
-        .then(com => res.json(com.DTO))
-        .catch(e => res.json(e))
-    }).catch(e => next(Utils.error.badRequest(e)));
+  return M.findById(req.params.id)
+    .exec((err, doc) => {
+      if (err) {
+        Utils.Log.error(err);
+        Utils.error.badRequest(err);
+      } else {
+        doc.addSolution(req.user, req.body)
+          .then(doc => {
+            req.payload = doc.DTO();
+            next();
+          })
+          .catch(e => next(Utils.error.badRequest(e)))
+      }
+    })
 };
 
 exports.getByPermalink = (M, req, res, next) => {
-  return M.loadOne({permalink: req.body.permalink})
-    .then((m) => res.json(m.DTO))
-    .catch((e) => next(Utils.error.badRequest(e)));
+  return M.findOne({permalink: req.body.permalink})
+    .exec((err, doc) => {
+      if (err) {
+        Utils.Log.error(err);
+        Utils.error.badRequest(err);
+      } else {
+        req.payload = doc.DTO();
+        next();
+      }
+    })
 };
 
 
 exports.judgeTag = (M, req, res, next) => {
-  return M.loadOne({_id: ObjectID(req.params.id)})
-    .then((m) => {
-      m.approveOrDeny(req.body.decision)
-        .then(v => res.json(v))
-        .catch(e => res.json(e))
-    }).catch(e => next(Utils.error.badRequest(e)));
+  return M.findById(req.params.id)
+    .exec((err, doc) => {
+      if (err) {
+        Utils.Log.error(err);
+        Utils.error.badRequest(err);
+      } else {
+        doc.approveOrDeny(req.user, req.body.decision)
+          .then(v => {
+            req.payload = v;
+            next();
+          })
+          .catch(e => next(Utils.error.badRequest(e)))
+      }
+    })
 };

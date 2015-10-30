@@ -7,7 +7,7 @@ const
   express = require('express'),
   favicon = require('serve-favicon'),
   logger = require('morgan'),
-  camo = require('camo'),
+  mongoose = require('mongoose'),
   path = require('path'),
   stormpath = require('express-stormpath');
 
@@ -29,15 +29,17 @@ app.use(stormpath.init(app, {
   expandGroups: true
 }));
 
-camo.connect(
+mongoose.set('debug', true);
+
+var deepPopulate = require('mongoose-deep-populate')(mongoose);
+
+
+mongoose.connect(
   'mongodb://' +
   process.env.MONGO_USER + ':' +
   process.env.MONGO_PASSWORD + '@' +
   process.env.MONGO_URL
-).then((db) => {
-    app.set('db', db);
-    console.log('Connected to database...');
-});
+)
 
 app.use(compression({level:7}));
 app.set('views', path.join(__dirname, 'views'));

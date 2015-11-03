@@ -18,6 +18,8 @@ module.exports = ModelFactory.fabricate({
   methods: {
     DTO () {
       return {
+        type: "Tag",
+        collection: "tags",
         id: this._id,
         name: this.name,
         authorName: this.getAuthorName(),

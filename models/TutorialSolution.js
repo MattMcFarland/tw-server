@@ -17,6 +17,7 @@ module.exports = Utils.ModelFactory.fabricate({
     DTO (user) {
       return {
         type: 'TutorialSolution',
+        collection: "solutions",
         id: this._id,
         authorName: this.getAuthorName(),
         authorUrl: this.getAuthorUrl(),
@@ -30,7 +31,8 @@ module.exports = Utils.ModelFactory.fabricate({
           return com.DTO ? com.DTO(user) : com;
         }),
         userPrivs: this.getUserPrivs(user),
-        removed: this.removed
+        removed: this.removed,
+        isOwner: this.checkOwnership(Utils.Users.getId(user))
       }
     },
     edit (data) {

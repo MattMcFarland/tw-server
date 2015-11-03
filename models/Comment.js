@@ -11,6 +11,7 @@ module.exports = Utils.ModelFactory.fabricate({
     DTO (user) {
       return {
         type: 'Comment',
+        collection: "comments",
         id: this._id,
         authorName: this.getAuthorName(),
         authorUrl: this.getAuthorUrl(),
@@ -24,7 +25,8 @@ module.exports = Utils.ModelFactory.fabricate({
         userVote: this.getUserVote(user),
         userFlags: this.getUserFlags(user),
         userPrivs: this.getUserPrivs(user),
-        removed: this.removed
+        removed: this.removed,
+        isOwner: this.checkOwnership(Utils.Users.getId(user))
       }
     },
     edit (data) {

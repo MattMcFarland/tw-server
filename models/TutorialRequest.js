@@ -51,7 +51,8 @@ module.exports = Utils.ModelFactory.fabricate({
           return com.DTO ? com.DTO(user) : com;
         }),
         removed: this.removed,
-        userPrivs: this.getUserPrivs(user)
+        userPrivs: this.getUserPrivs(user),
+        isOwner: this.checkOwnership(Utils.Users.getId(user))
       };
     },
 

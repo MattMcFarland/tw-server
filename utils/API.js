@@ -190,12 +190,17 @@ exports.vote = (M, req, res, next) => {
     })
 };
 
+// TODO: Add exception handler if id is not found
 exports.addComment = (M, req, res, next) => {
+  if (!req.body.message) {
+    Utils.Log.error('req.body.message is undefined');
+    next(Utils.error.badRequest('req.body.message is undefined'))
+  }
   return M.findById(req.params.id)
     .exec((err, doc) => {
       if (err) {
         Utils.Log.error(err);
-        Utils.error.badRequest(err);
+        next(Utils.error.badRequest(err));
       } else {
         doc.addComment(req.user, req.body.message)
           .then(doc => {

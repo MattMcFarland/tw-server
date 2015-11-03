@@ -18,7 +18,7 @@ const
   api   = require('./routes/api'),
   index = require('./routes/index');
 
-app.use(timeout('5s'));
+app.use(timeout('15s'));
 
 app.use(Utils.Middlewares.timeOut());
 

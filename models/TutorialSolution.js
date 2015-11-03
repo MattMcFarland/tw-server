@@ -14,7 +14,7 @@ module.exports = Utils.ModelFactory.fabricate({
     linkMeta:   { type: Object }
   },
   methods: {
-    DTO () {
+    DTO (user) {
       return {
         type: 'TutorialSolution',
         id: this._id,
@@ -24,9 +24,13 @@ module.exports = Utils.ModelFactory.fabricate({
         editorUrl: this.getEditorUrl(),
         flags: this.getFlags(),
         score: this.tallyVotes(),
+        userVote: this.getUserVote(user),
+        userFlags: this.getUserFlags(user),
         comments: this.comments.map((com) => {
-          return com.DTO ? com.DTO() : com;
-        })
+          return com.DTO ? com.DTO(user) : com;
+        }),
+        userPrivs: this.getUserPrivs(user),
+        removed: this.removed
       }
     },
     edit (data) {

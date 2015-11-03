@@ -7,6 +7,25 @@ const
   paginate      = require('mongoose-paginate'),
   Schema        = mongoose.Schema;
 
+
+var mergeArrays = function (dest, source) {
+  var obj = {};
+  dest.forEach(function (item) {
+    obj[item.key] = item.value;
+  });
+
+  source.forEach(function (item) {
+    obj[item.key] = item.value;
+  });
+
+  return Object.keys(obj).map(function(key){
+    return { key, value:obj[key] };
+  });
+};
+
+
+
+
 class ModelFactory {
 
   static createProps (options) {
@@ -67,6 +86,54 @@ class ModelFactory {
           return '';
         }
         return 'users/' + Utils.Users.getId(this.author);
+      },
+
+      getUserVote (user) {
+        var uid = Utils.Users.getId(user),
+          voteIndex = _.findIndex(this.voters, {'uid': uid});
+
+        return (voteIndex > -1) ? this.voters[voteIndex].vote : 0;
+      },
+
+      getUserFlags (user) {
+        var uid = Utils.Users.getId(user),
+          userFlags = _.filter(this.flaggers, { uid });
+
+        return mergeArrays([
+            { "key": "spam", "value": false },
+            { "key": "offensive", "value": false },
+            { "key": "duplicate", "value": false },
+            { "key": "vague", "value": false }
+          ],
+          userFlags.map(function (flag) {
+            return {
+              key: flag.type,
+              value: true
+            };
+          })
+        );
+      },
+
+      getUserPrivs (user) {
+        var uid = Utils.Users.getId(user),
+          isOwner = this.checkOwnership(uid),
+          usergroup, accessLevel, access;
+
+        if (user) {
+          if (user.groups && typeof user.groups.items &&
+            user.groups.items[0] &&
+            user.groups.items[0].name) {
+            usergroup = user.groups.items[0].name;
+            accessLevel = usergroup === "user" ? 1 : usergroup === "moderator" ? 2 : usergroup === "admin" ? 3 : 0;
+          }
+          access = (accessLevel >= 2);
+        }
+
+        return {
+          userCanEdit: access ? true : isOwner,
+          userCanDelete: access ? true : isOwner,
+          userCanSeeDeleted: access ? true : isOwner
+        }
       }
     }
   }
@@ -124,7 +191,7 @@ class ModelFactory {
           var voteIndex, newVote, oldVote, uid = Utils.Users.getId(user);
           this.voters && this.voters.length || (this.voters = []);
           voteIndex = _.findIndex(this.voters, {'uid': uid});
-          console.log('voteIndex', voteIndex);
+          //console.log('voteIndex', voteIndex);
           if (voteIndex === -1) {
             newVote = direction === "up" ? 1 : -1;
           } else {
@@ -136,14 +203,14 @@ class ModelFactory {
             }
             this.voters.splice(voteIndex, 1);
           }
-          console.log('newVote', uid, newVote);
+          //console.log('newVote', uid, newVote);
           this.voters.push({
             uid: uid,
             vote: newVote
           });
-          console.log('saving...');
+          //console.log('saving...');
           this.score = this.tallyVotes();
-          console.log('votes tally complete');
+          //console.log('votes tally complete');
           this.save((err, nd) => {
             if (err) {
               Utils.Log.error(err);
@@ -172,14 +239,17 @@ class ModelFactory {
 
       removeOrUndoRemove (editor) {
         return new Promise((resolve, reject) => {
-          try {
-            this.updated_at = Date.now();
-            this.editor = editor;
-            this.removed = !this.removed;
-            this.save().exec()
-              .then((i) => resolve(i))
-              .catch((e) => reject(e));
-          } catch (e) { reject(e) }
+          this.removed = !this.removed;
+          this.save((err, nd) => {
+            if (err) {
+              Utils.Log.error(err);
+              reject(err)
+            } else if (nd) {
+              resolve(nd);
+            } else {
+              reject('404');
+            }
+          })
         });
       }
     }

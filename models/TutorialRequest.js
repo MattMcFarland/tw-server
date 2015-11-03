@@ -21,7 +21,7 @@ module.exports = Utils.ModelFactory.fabricate({
     solutions: [{ type: Schema.Types.ObjectId, ref: 'TutorialSolution' }]
   },
   methods: {
-    DTO () {
+    DTO (user) {
       return {
         type: "TutorialRequest",
         id: this.id,
@@ -42,13 +42,16 @@ module.exports = Utils.ModelFactory.fabricate({
         editorUrl: this.getEditorUrl(),
         flags: this.getFlags(),
         score: this.score || 0,
+        userVote: this.getUserVote(user),
+        userFlags: this.getUserFlags(user),
         solutions: this.solutions.map((sol) => {
-          return sol.DTO ? sol.DTO() : sol;
+          return sol.DTO ? sol.DTO(user) : sol;
         }),
         comments: this.comments.map((com) => {
-          return com.DTO ? com.DTO() : com;
+          return com.DTO ? com.DTO(user) : com;
         }),
-        removed: this.removed
+        removed: this.removed,
+        userPrivs: this.getUserPrivs(user)
       };
     },
 

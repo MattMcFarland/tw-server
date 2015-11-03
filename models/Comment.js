@@ -8,7 +8,7 @@ module.exports = Utils.ModelFactory.fabricate({
     message: {type: String, required: true }
   },
   methods: {
-    DTO () {
+    DTO (user) {
       return {
         type: 'Comment',
         id: this._id,
@@ -20,7 +20,11 @@ module.exports = Utils.ModelFactory.fabricate({
         updated_at: this.updated_at,
         message: this.message,
         flags: this.getFlags(),
-        score: this.tallyVotes()
+        score: this.tallyVotes(),
+        userVote: this.getUserVote(user),
+        userFlags: this.getUserFlags(user),
+        userPrivs: this.getUserPrivs(user),
+        removed: this.removed
       }
     },
     edit (data) {

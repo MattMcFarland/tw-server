@@ -6,6 +6,9 @@ const
   Tag = require('../models/Tag');
 
 exports.getAll = (M, req, res, next) => {
+  var limit = req.query.limit || 10;
+  var page = req.query.page || 1;
+  var skip = (page - 1) * limit
   var query = {
     removed: { $ne: true }
   }
@@ -17,6 +20,8 @@ exports.getAll = (M, req, res, next) => {
   }
 
   return M.find(query)
+    .skip(skip)
+    .limit(limit)
     .sort({created_at: -1})
     .populate('tags')
     .populate('solutions')
@@ -26,7 +31,7 @@ exports.getAll = (M, req, res, next) => {
         Utils.Log.error(err);
         Utils.error.badRequest(err);
       } else {
-        req.payload = data.map(m => m.DTO());
+        req.payload = data.map(m => m.DTO(req.user));
         next();
       }
     })
@@ -42,7 +47,7 @@ exports.getById = (M, req, res, next, Comment) => {
         Utils.Log.error(err);
         Utils.error.badRequest(err);
       } else {
-        req.payload = model.DTO();
+        req.payload = model.DTO(req.user);
         next();
       }
     })
@@ -62,7 +67,7 @@ exports.addToDB = (M, req, res, next) => {
         if (err) {
           abort(err);
         } else {
-          req.payload = nd.DTO();
+          req.payload = nd.DTO(req.user);
           next();
         }
       })
@@ -115,7 +120,7 @@ exports.update = (M, req, res, next) => {
       var doUpdate = (data) => {
         console.log('updating data', data);
         doc.edit(data).then((nd) => {
-          req.payload = nd.DTO();
+          req.payload = nd.DTO(req.user);
           next();
         })
       };
@@ -130,7 +135,7 @@ exports.update = (M, req, res, next) => {
             return doUpdate(Object.assign(
               req.body,
               {
-                editor: req.user,
+                editor: req.user
               }
             ));
           }).catch(abort)
@@ -139,7 +144,7 @@ exports.update = (M, req, res, next) => {
           return doUpdate(Object.assign(
             req.body,
             {
-              editor: req.user,
+              editor: req.user
             }
           ));
         }
@@ -194,7 +199,7 @@ exports.addComment = (M, req, res, next) => {
       } else {
         doc.addComment(req.user, req.body.message)
           .then(doc => {
-            req.payload = doc.DTO();
+            req.payload = doc.DTO(req.user);
             next();
           })
           .catch(e => {
@@ -214,7 +219,7 @@ exports.delete = (M, req, res, next) => {
         } else {
           doc.removeOrUndoRemove(req.user, req.body.message)
             .then(doc => {
-              req.payload = doc.DTO();
+              req.payload = doc.DTO(req.user);
               next();
             })
             .catch(e => next(Utils.error.badRequest(e)))
@@ -232,7 +237,7 @@ exports.addSolution = (M, req, res, next) => {
       } else {
         doc.addSolution(req.user, req.body)
           .then(doc => {
-            req.payload = doc.DTO();
+            req.payload = doc.DTO(req.user);
             next();
           })
           .catch(e => next(Utils.error.badRequest(e)))
@@ -241,13 +246,16 @@ exports.addSolution = (M, req, res, next) => {
 };
 
 exports.getByPermalink = (M, req, res, next) => {
-  return M.findOne({permalink: req.body.permalink})
+  return M.findOne({permalink: req.params.permalink})
+    .populate('tags')
+    .populate('comments')
+    .populate('solutions')
     .exec((err, doc) => {
       if (err) {
         Utils.Log.error(err);
         Utils.error.badRequest(err);
       } else {
-        req.payload = doc.DTO();
+        req.payload = doc.DTO(req.user);
         next();
       }
     })

@@ -4,7 +4,7 @@ var Tag = require('../models/Tag');
 module.exports = function (tagString, user) {
   var done = false, tags = [], tagArray = tagString.split(',');
 
-  console.log('createOrEditTags', tagArray);
+  //console.log('createOrEditTags', tagArray);
 
   return new Promise((resolve, reject) => {
     Utils.async.eachSeries(tagArray, (tagName, next) => {
@@ -30,13 +30,13 @@ module.exports = function (tagString, user) {
 
           // Find out if tag exists or not
           Tag.findOne({name: tagName}, function (err, tag) {
-            console.log('findOne', err, tag);
+            //console.log('findOne', err, tag);
             if (!err && tag) {
 
               //
               // Update an existing tag.
               //
-              console.log('Update existing tag', tagName);
+              //console.log('Update existing tag', tagName);
               (function () {
 
                 tag.author = user ? user : '';
@@ -51,7 +51,7 @@ module.exports = function (tagString, user) {
               //
               // Create a new tag.
               //
-              console.log('Create new tag', tagName);
+              //console.log('Create new tag', tagName);
               (function () {
 
                 var newTag = new Tag();

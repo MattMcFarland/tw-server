@@ -8,11 +8,11 @@ class Log {
   }
 
   static warn(msg) {
-    console.log(chalk.yellow('Warning: ' + msg));
+    //console.log(chalk.yellow('Warning: ' + msg));
   }
 
   static info(msg) {
-    console.log(chalk.cyan('Info: ' + msg));
+    //console.log(chalk.cyan('Info: ' + msg));
   }
 
 }

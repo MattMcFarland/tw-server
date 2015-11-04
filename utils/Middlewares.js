@@ -19,7 +19,7 @@ class Middlewares {
     owner = (typeof owner === "undefined") ? true : owner;
 
     return function (req, res, next) {
-      console.log(owner);
+      //console.log(owner);
       var uid = Utils.Users.getId(req.user);
       var id = req.params.id;
       var access = false;
@@ -30,7 +30,7 @@ class Middlewares {
           req.usergroup = req.user.groups.items[0].name;
           req.accessLevel = req.usergroup === "user" ? 1 : req.usergroup === "moderator" ? 2 : req.usergroup === "admin" ? 3 : 0;
         }
-        console.log(req.accessLevel);
+        //console.log(req.accessLevel);
         access = (req.accessLevel >= level);
       }
       // check if access granted by user group.
@@ -38,7 +38,7 @@ class Middlewares {
         next();
         // check if access granted by ownership.
       }  else if (req.user && owner && id && M) {
-        //console.log('check for ownership', id);
+        ////console.log('check for ownership', id);
 
         M.findById(id)
           .then((mod) => {

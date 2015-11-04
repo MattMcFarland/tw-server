@@ -33,7 +33,7 @@ module.exports = Utils.ModelFactory.fabricate({
         permalink: this.permalink,
         content: this.content,
         tags: this.tags.map((tag) => {
-          console.log('tag???', tag)
+          //console.log('tag???', tag)
           return tag.DTO ? tag.DTO() : tag;
         }),
         authorName: this.getAuthorName(),
@@ -59,7 +59,7 @@ module.exports = Utils.ModelFactory.fabricate({
     edit (data) {
       return new Promise((resolve, reject) => {
           if (data) {
-            console.log('data found', data);
+            //console.log('data found', data);
 
             this.editor = data.editor;
             this.updated_at = Date.now();

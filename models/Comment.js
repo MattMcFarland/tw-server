@@ -32,7 +32,7 @@ module.exports = Utils.ModelFactory.fabricate({
     edit (data) {
       return new Promise((resolve, reject) => {
         if (data) {
-          console.log('data found', data);
+          //console.log('data found', data);
 
           this.editor = data.editor;
           this.updated_at = Date.now();

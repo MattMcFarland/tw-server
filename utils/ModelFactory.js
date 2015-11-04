@@ -144,7 +144,7 @@ class ModelFactory {
         return _.countBy(this.flaggers, {type: flagType}).true || 0;
       },
       checkOwnership (uid) {
-        console.log('owner???', uid === Utils.Users.getId(this.author));
+        //console.log('owner???', uid === Utils.Users.getId(this.author));
         return uid === Utils.Users.getId(this.author);
       },
       addOrRemoveFlag (user, flagType) {
@@ -191,7 +191,7 @@ class ModelFactory {
           var voteIndex, newVote, oldVote, uid = Utils.Users.getId(user);
           this.voters && this.voters.length || (this.voters = []);
           voteIndex = _.findIndex(this.voters, {'uid': uid});
-          //console.log('voteIndex', voteIndex);
+          ////console.log('voteIndex', voteIndex);
           if (voteIndex === -1) {
             newVote = direction === "up" ? 1 : -1;
           } else {
@@ -203,14 +203,14 @@ class ModelFactory {
             }
             this.voters.splice(voteIndex, 1);
           }
-          //console.log('newVote', uid, newVote);
+          ////console.log('newVote', uid, newVote);
           this.voters.push({
             uid: uid,
             vote: newVote
           });
-          //console.log('saving...');
+          ////console.log('saving...');
           this.score = this.tallyVotes();
-          //console.log('votes tally complete');
+          ////console.log('votes tally complete');
           this.save((err, nd) => {
             if (err) {
               Utils.Log.error(err);

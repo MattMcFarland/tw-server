@@ -8,6 +8,7 @@ const
 exports.getAll = (M, req, res, next) => {
   var limit = req.query.limit || 10;
   var page = req.query.page || 1;
+  var sortObj = req.query.sortBy === "score" ? {score: -1} : {created_at: -1}
   var skip = (page - 1) * limit
   var query = {
     removed: { $ne: true }
@@ -18,11 +19,11 @@ exports.getAll = (M, req, res, next) => {
   if (req.query.$where) {
     query.$where = req.query.$where
   }
-
+  console.log('sort', sortObj);
   return M.find(query)
+    .sort(sortObj)
     .skip(skip)
     .limit(limit)
-    .sort({created_at: -1})
     .populate('tags')
     .populate('solutions')
     .populate('comments')
@@ -62,7 +63,7 @@ exports.addToDB = (M, req, res, next) => {
   }
 
   var create = (data) => {
-      console.log('creating new data', data);
+      //console.log('creating new data', data);
       M.create(data, (err, nd) => {
         if (err) {
           abort(err);
@@ -118,7 +119,7 @@ exports.update = (M, req, res, next) => {
     .exec((err, doc) => {
 
       var doUpdate = (data) => {
-        console.log('updating data', data);
+        //console.log('updating data', data);
         doc.edit(data).then((nd) => {
           req.payload = nd.DTO(req.user);
           next();
@@ -178,7 +179,7 @@ exports.vote = (M, req, res, next) => {
       } else {
         doc.createOrUpdateVote(req.user, req.body.direction)
           .then(v => {
-            console.log('here be the v', v);
+            //console.log('here be the v', v);
             req.payload = v;
             next();
           })

@@ -16,7 +16,8 @@ const
   Utils = require('./utils'),
   app   = express(),
   api   = require('./routes/api'),
-  index = require('./routes/index');
+  index = require('./routes/index'),
+  scrape = require('./routes/scrape');
 
 app.use(timeout('15s'));
 
@@ -58,6 +59,7 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/@mattmcfarland/
 app.use('/', index);
 
 app.use('/api', api);
+app.use('/api/scrape', scrape);
 /*
 app.use(usergroup);
 

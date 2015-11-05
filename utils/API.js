@@ -37,7 +37,6 @@ exports.getAll = (M, req, res, next) => {
       }
     })
 };
-
 exports.getById = (M, req, res, next, Comment) => {
   return M.findOne({_id: req.params.id})
     .populate('comments')
@@ -53,7 +52,6 @@ exports.getById = (M, req, res, next, Comment) => {
       }
     })
 };
-
 exports.addToDB = (M, req, res, next) => {
 
   // DRY error handler
@@ -110,7 +108,6 @@ exports.addToDB = (M, req, res, next) => {
     return create(req.body);
   }
 };
-
 exports.update = (M, req, res, next) => {
   console.log('[update] [1] perform update >>>', req.params.id);
 
@@ -159,7 +156,6 @@ exports.update = (M, req, res, next) => {
       }
     })
 };
-
 exports.flag = (M, req, res, next) => {
   return M.findById(req.params.id)
     .exec((err, doc) => {
@@ -176,7 +172,6 @@ exports.flag = (M, req, res, next) => {
       }
     })
 };
-
 exports.vote = (M, req, res, next) => {
   return M.findById(req.params.id)
     .exec((err, doc) => {

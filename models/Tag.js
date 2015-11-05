@@ -31,7 +31,7 @@ module.exports = ModelFactory.fabricate({
         removed: this.removed
       }
     },
-    approveOrDeny (decision) {
+    approveOrDeny (user, decision) {
       return new Promise((resolve, reject) => {
         if (decision !== "deny" && decision !== "approve") {
           reject("invalid decision must be approve or deny");
@@ -39,13 +39,19 @@ module.exports = ModelFactory.fabricate({
         if (this.is_pending) {
           this.is_pending = false;
           this.is_approved = (decision === "approve");
-          this.save().exec()
-            .then((i) => {
-              resolve({
-                "is_approved": this.is_approved,
-                "reason": "new"
-              });
-            }).catch((e) => reject(e));
+          if (this.is_approved) {
+            this.save((err, doc) => {
+              if (err) {
+                reject(err);
+              } else if (doc) {
+                resolve(doc);
+              } else {
+                reject('404');
+              }
+            })
+          } else {
+            resolve(this.remove());
+          }
         } else {
           resolve({
             "is_approved": this.is_approved,

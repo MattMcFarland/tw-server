@@ -73,13 +73,16 @@ exports.addToDB = (M, req, res, next) => {
         }
       })
   };
-
+  if (req.body.content) {
+    req.body.content = Utils.xss(req.body.content);
+  }
   if (req.body.title) {
+    req.body.title = Utils.xss(req.body.title);
     Utils.createPermalink(M, req.body.title)
       .then((permalink) => {
 
         if (req.body.tags) {
-
+          req.body.tags = Utils.xss(req.body.tags);
           Utils.createOrEditTags(req.body.tags).then((tags) => {
             req.body.tags = [].concat(tags);
             return create(Object.assign(
@@ -285,7 +288,10 @@ exports.judgeTag = (M, req, res, next) => {
             req.payload = v;
             next();
           })
-          .catch(e => next(Utils.error.badRequest(e)))
+          .catch(e => {
+            Utils.Log.error(e);
+            next(Utils.error.badRequest(e))
+          })
       }
     })
 };

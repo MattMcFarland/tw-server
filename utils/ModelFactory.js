@@ -128,6 +128,7 @@ class ModelFactory {
         }
 
         return {
+          isModerator: access,
           userCanEdit: access ? true : isOwner,
           userCanDelete: access ? true : isOwner,
           userCanSeeDeleted: access ? true : isOwner

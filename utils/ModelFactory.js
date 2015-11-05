@@ -3,10 +3,8 @@ const
   _             = require('lodash'),
   Utils         = require('./index'),
   mongoose      = require('mongoose'),
-  deepPopulate  = require('mongoose-deep-populate'),
   paginate      = require('mongoose-paginate'),
   Schema        = mongoose.Schema;
-
 
 var mergeArrays = function (dest, source) {
   var obj = {};
@@ -268,12 +266,12 @@ class ModelFactory {
     var rawSchema = ModelFactory.createProps(options.props);
     var schema = new mongoose.Schema(rawSchema);
     //schema.plugin(deepPopulate);
-    schema.plugin(paginate);
     schema.methods = Object.assign(
       options.methods,
       ModelFactory.createGetters(options.type),
       ModelFactory.createMethods());
-    return mongoose.model(options.name, schema);
+    schema.plugin(paginate);
+    return {model: mongoose.model(options.name, schema), schema: schema};
   }
 }
 

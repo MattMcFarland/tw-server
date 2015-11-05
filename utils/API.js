@@ -109,6 +109,7 @@ exports.addToDB = (M, req, res, next) => {
 };
 
 exports.update = (M, req, res, next) => {
+  console.log('[update] [1] perform update >>>', req.params.id);
 
   var abort = (e) => {
     Utils.Log.error(e);
@@ -117,10 +118,12 @@ exports.update = (M, req, res, next) => {
 
   return M.findById(req.params.id).populate('tags')
     .exec((err, doc) => {
-
+      console.log('[update] [2] doc found >>>', doc.id);
       var doUpdate = (data) => {
+        console.log('[update] [4] run edit method ');
         //console.log('updating data', data);
         doc.edit(data).then((nd) => {
+          console.log('[update] [5] edit method complete ');
           req.payload = nd.DTO(req.user);
           next();
         })
@@ -142,6 +145,7 @@ exports.update = (M, req, res, next) => {
           }).catch(abort)
 
         } else {
+          console.log('[update] [3] update body >>>', req.body);
           return doUpdate(Object.assign(
             req.body,
             {
@@ -256,6 +260,7 @@ exports.getByPermalink = (M, req, res, next) => {
     .populate('tags')
     .populate('comments')
     .populate('solutions')
+    .deepPopulate('solutions.comments')
     .exec((err, doc) => {
       if (err) {
         Utils.Log.error(err);

@@ -53,4 +53,4 @@ module.exports = Utils.ModelFactory.fabricate({
       });
     }
   }
-});
+}).model;

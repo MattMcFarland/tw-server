@@ -10,6 +10,7 @@ module.exports = Utils.ModelFactory.fabricate({
   type: 'tutorialsolution',
   props: {
     processing: { type: Boolean },
+    content: {type: String},
     version:    { type: String },
     linkMeta:   { type: Object }
   },
@@ -18,7 +19,10 @@ module.exports = Utils.ModelFactory.fabricate({
       return {
         type: 'TutorialSolution',
         collection: "solutions",
+        content: this.content,
+        title: this.linkMeta.title,
         id: this._id,
+        linkMeta: this.linkMeta,
         authorName: this.getAuthorName(),
         authorUrl: this.getAuthorUrl(),
         editorName: this.getEditorName(),
@@ -35,6 +39,7 @@ module.exports = Utils.ModelFactory.fabricate({
         isOwner: this.checkOwnership(Utils.Users.getId(user))
       }
     },
+
     edit (data) {
       return new Promise((resolve, reject) => {
         if (data) {
@@ -42,8 +47,8 @@ module.exports = Utils.ModelFactory.fabricate({
 
           this.editor = data.editor;
           this.updated_at = Date.now();
-          this.content = fields.content ? Utils.xss(fields.content) : this.content;
-          this.linkMeta = fields.linkMeta ? fields.linkMeta : this.linkMeta;
+          this.content = data.content ? Utils.xss(data.content) : this.content;
+          this.linkMeta = data.linkMeta ? data.linkMeta : this.linkMeta;
 
 
           this.save((err, doc) => {
@@ -79,4 +84,4 @@ module.exports = Utils.ModelFactory.fabricate({
       });
     }
   }
-});
+}).model;

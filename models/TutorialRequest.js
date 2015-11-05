@@ -2,13 +2,14 @@
 const
   _             = require('lodash'),
   mongoose      = require('mongoose'),
+  deepPopulate  = require('mongoose-deep-populate')(mongoose),
   Schema        = mongoose.Schema,
   Solution      = require('./TutorialSolution'),
   Comment       = require('./Comment'),
   Tag           = require('./Tag'),
   Utils         = require('../utils');
 
-module.exports = Utils.ModelFactory.fabricate({
+var tutorialRequest = Utils.ModelFactory.fabricate({
   name: 'TutorialRequest',
   type: 'tutorialRequest',
   props: {
@@ -121,3 +122,6 @@ module.exports = Utils.ModelFactory.fabricate({
     }
   }
 });
+
+tutorialRequest.schema.plugin(deepPopulate);
+module.exports = tutorialRequest.model;

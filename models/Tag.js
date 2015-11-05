@@ -78,4 +78,4 @@ module.exports = ModelFactory.fabricate({
       });
     }
   }
-});
+}).model;

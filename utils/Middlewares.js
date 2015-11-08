@@ -19,8 +19,6 @@ class Middlewares {
     owner = (typeof owner === "undefined") ? true : owner;
 
     return function (req, res, next) {
-      //console.log(owner);
-      var uid = Utils.Users.getId(req.user);
       var id = req.params.id;
       var access = false;
       if (req.user) {
@@ -32,6 +30,10 @@ class Middlewares {
         }
         //console.log(req.accessLevel);
         access = (req.accessLevel >= level);
+        if (!req.user.customData.uid) {
+          req.user.customData.uid = Utils.Users.getId(req.user);
+          req.user.save();
+        }
       }
       // check if access granted by user group.
       if (access) {
@@ -42,7 +44,7 @@ class Middlewares {
 
         M.findById(id)
           .then((mod) => {
-            if (mod.checkOwnership(uid)) {
+            if (mod.checkOwnership(Utils.Users.getId(req.user))) {
               next();
             } else {
               next(Utils.error.forbidden());

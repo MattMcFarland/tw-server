@@ -14,6 +14,8 @@ class Users {
     }
   }
 
+
+
   static getId(userObject) {
     if (userObject && userObject.username) {
       return md5(process.env.USER_HASH + userObject.username);

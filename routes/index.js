@@ -2,7 +2,7 @@ var router = require('express').Router();
 var TutorialRequest = require('../models/TutorialRequest');
 var Utils = require('../utils');
 var MW = Utils.Middlewares;
-router.use(MW.fauxUser(2));
+// router.use(MW.fauxUser(2));
 
 router.get('/', function(req, res) {
   res.render('script', { js_id:'index', js: 'index', user: req.user ? (req.user) : '' });

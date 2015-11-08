@@ -35,7 +35,7 @@ function createEndpoints(path, model) {
 }
 
 /** Add or remove faux user here */
-api.use(MW.fauxUser(2));
+// api.use(MW.fauxUser(2));
 
 createEndpoints('/tutorial-requests', TutorialRequest);
 createEndpoints('/tutorial-solutions', TutorialSolution);

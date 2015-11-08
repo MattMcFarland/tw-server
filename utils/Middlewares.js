@@ -21,15 +21,21 @@ class Middlewares {
     return function (req, res, next) {
       var id = req.params.id;
       var access = false;
+      //console.log('checking account auth...');
       if (req.user) {
+        //console.log('Found user ' + req.user.username);
         if (req.user.groups && typeof req.user.groups.items &&
           req.user.groups.items[0] &&
           req.user.groups.items[0].name) {
           req.usergroup = req.user.groups.items[0].name;
-          req.accessLevel = req.usergroup === "user" ? 1 : req.usergroup === "moderator" ? 2 : req.usergroup === "admin" ? 3 : 0;
+          req.accessLevel = req.usergroup === "user" ? 1 : req.usergroup === "moderator" ? 2 : req.usergroup === "admins" ? 3 : 0;
         }
-        //console.log(req.accessLevel);
+        //console.log('usergroup', req.usergroup);
+        //console.log('accessLevel', req.accessLevel);
+        //console.log('level required', level);
+        ////console.log(req.accessLevel);
         access = (req.accessLevel >= level);
+        //console.log('User access: ' + access);
         if (!req.user.customData.uid) {
           req.user.customData.uid = Utils.Users.getId(req.user);
           req.user.save();
@@ -40,13 +46,14 @@ class Middlewares {
         next();
         // check if access granted by ownership.
       }  else if (req.user && owner && id && M) {
-        ////console.log('check for ownership', id);
+        //////console.log('check for ownership', id);
 
         M.findById(id)
           .then((mod) => {
             if (mod.checkOwnership(Utils.Users.getId(req.user))) {
               next();
             } else {
+              //console.log('access denied');
               next(Utils.error.forbidden());
             }
           }).catch((e) => {
@@ -81,7 +88,7 @@ class Middlewares {
         req.user = fauxUser();
       }
       req.usergroup = req.user.groups.items[0].name;
-      Utils.Log.info(req.user.username + ':' + req.usergroup);
+      //console.log(req.user.username + ':' + req.usergroup);
       Utils.Log.warn('fauxUser Middleware is active, disable to use real auth');
       next();
     }

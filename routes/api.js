@@ -85,16 +85,43 @@ api.post('/account',
       surname: req.user.surname,
       email: req.user.email
     });
+    next();
 
   }
 );
+
+
+api.post('/profile',
+  MW.authenticate(1), (req, res, next) => {
+    //let {bio, links, location, occupation}
+    req.user.customData.bio = req.body.bio;
+    req.user.customData.links = req.body.links;
+    req.user.customData.location = req.body.location;
+    req.user.customData.occupation = req.body.occupation;
+
+    req.user.save((err, data) => {
+      if (err || !data) {
+        next();
+      } else {
+        req.payload = ({
+          bio: req.user.customData.bio,
+          links: req.user.customData.links,
+          location: req.user.customData.location,
+          occupation: req.user.customData.occupation
+        });
+        next();
+      }
+    });
+  }
+);
+
 
 
 // append to user history
 
 api.use((req, res, next) => {
   var extras = {};
-  if (req.method !== "GET" && req.method !== "DELETE") {
+  if (req.method !== "GET" && req.method !== "DELETE" && req.action && req.actionurl) {
     if (req.payload && req.user) {
       var addToArray = {
         timestamp: new Date().toISOString(),

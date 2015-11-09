@@ -24,10 +24,11 @@ app.use(timeout('15s'));
 app.use(Utils.Middlewares.timeOut());
 
 app.use(stormpath.init(app, {
-  application: "https://api.stormpath.com/v1/applications/5Bi5Y8savIbPgT8JX8nYwO",
-  secretKey: "UB@(KAKn[}%}+2TM8^9e+miEFG|@2bVAmAJf#HP-",
-  expandCustomData: true,
-  expandGroups: true
+  website: true,
+  expand: {
+    customData: true,
+    groups: true
+  }
 }));
 
 mongoose.set('debug', true);

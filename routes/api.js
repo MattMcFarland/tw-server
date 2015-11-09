@@ -75,6 +75,24 @@ api.put('/tags/:id/judge',
 
 
 
+api.post('/account',
+  MW.authenticate(1), (req, res, next) => {
+    req.user.givenName = req.body.givenName;
+    req.user.surname = req.body.surname;
+    req.user.email = req.body.email;
+
+    req.user.save();
+    req.payload = ({
+      givenName: req.user.givenName,
+      surname: req.user.surname,
+      email: req.user.email
+    });
+
+  }
+);
+
+
+
 api.use((req, res, next) => {
   if (req.payload) {
     res.json(req.payload);

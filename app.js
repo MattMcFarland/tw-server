@@ -60,7 +60,7 @@ app.use('/js', express.static(path.join(__dirname, 'node_modules/@mattmcfarland/
 app.use('/', index);
 
 app.use('/api', api);
-app.use('/api/scrape', scrape);
+app.use('/_api/scrape', scrape);
 /*
 app.use(usergroup);
 

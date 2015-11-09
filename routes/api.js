@@ -43,8 +43,6 @@ createEndpoints('/comments', Comment);
 
 
 
-
-
 api.put('/tutorial-requests/:id/solution',
  MW.authenticate(1, TutorialRequest), (req, res, next) =>
     Utils.API.addSolution(TutorialRequest, req, res, next)
@@ -92,7 +90,42 @@ api.post('/account',
 );
 
 
+// append to user history
 
+api.use((req, res, next) => {
+  var extras = {};
+  if (req.method !== "GET" && req.method !== "DELETE") {
+    if (req.payload && req.user) {
+
+      if (!req.user.customData.history) {
+        req.user.customData.history = [];
+      }
+
+      req.user.customData.history.push({
+        timestamp: new Date().toISOString(),
+        method: req.method,
+        path: req.path,
+        action: req.action,
+        target: req.target,
+        url: req.actionurl
+      });
+
+      req.user.save((err, data) => {
+        if (err) {
+          Utils.Log.error(err);
+          next();
+        }
+        next();
+      });
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
+})
+
+// send payload to client
 api.use((req, res, next) => {
   if (req.payload) {
     res.json(req.payload);

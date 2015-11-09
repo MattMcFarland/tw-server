@@ -96,19 +96,19 @@ api.use((req, res, next) => {
   var extras = {};
   if (req.method !== "GET" && req.method !== "DELETE") {
     if (req.payload && req.user) {
-
-      if (!req.user.customData.history) {
-        req.user.customData.history = [];
-      }
-
-      req.user.customData.history.push({
+      var addToArray = {
         timestamp: new Date().toISOString(),
         method: req.method,
         path: req.path,
         action: req.action,
         target: req.target,
         url: req.actionurl
-      });
+      }
+      if (!req.user.customData.history) {
+        req.user.customData.history = [].push(addToArray);
+      } else {
+        req.user.customData.history.push(addToArray);
+      }
 
       req.user.save((err, data) => {
         if (err) {

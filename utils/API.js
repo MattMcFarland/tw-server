@@ -136,7 +136,7 @@ exports.update = (M, req, res, next) => {
           if (req.payload.type === "TutorialRequest") {
             req.actionurl = req.body.rootUrl
           } else {
-            req.actionurl = req.body.rootUrl + '/#' + req.payload.type.toLowerCase() + '-' + req.target
+            req.actionurl = req.body.rootUrl + '#' + req.payload.type.toLowerCase() + '-' + req.target
           }
 
           next();
@@ -258,7 +258,7 @@ exports.addComment = (M, req, res, next) => {
             if (req.payload.type === "TutorialRequest") {
               req.actionurl = req.body.rootUrl
             } else {
-              req.actionurl = req.body.rootUrl + '/#' + 'comment-' + req.target
+              req.actionurl = req.body.rootUrl + '#' + 'comment-' + req.target
             }
             next();
           })
@@ -302,7 +302,7 @@ exports.addSolution = (M, req, res, next) => {
             req.payload = doc.DTO(req.user);
             req.action = "addSolution";
             req.target = req.params.id;
-            req.actionurl = req.body.rootUrl + '/#' + 'tutorialsolution-' + req.target
+            req.actionurl = req.body.rootUrl + '#' + 'tutorialsolution-' + req.target
             next();
           })
           .catch(e => next(Utils.error.badRequest(e)))

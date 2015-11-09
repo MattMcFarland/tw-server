@@ -28,7 +28,7 @@ class Middlewares {
           req.user.groups.items[0] &&
           req.user.groups.items[0].name) {
           req.usergroup = req.user.groups.items[0].name;
-          req.accessLevel = req.usergroup === "user" ? 1 : req.usergroup === "moderator" ? 2 : req.usergroup === "admins" ? 3 : 0;
+          req.accessLevel = req.usergroup === "user" ? 1 : req.usergroup === "moderators" ? 2 : req.usergroup === "admins" ? 3 : 0;
         }
         //console.log('usergroup', req.usergroup);
         //console.log('accessLevel', req.accessLevel);
@@ -38,6 +38,7 @@ class Middlewares {
         //console.log('User access: ' + access);
         if (!req.user.customData.uid) {
           req.user.customData.uid = Utils.Users.getId(req.user);
+
           req.user.save();
         }
       }

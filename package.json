@@ -37,6 +37,7 @@
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0",
     "should": "^7.1.1",
+    "superagent": "^1.4.0",
     "supertest": "^1.1.0",
     "toobusy-js": "^0.4.2",
     "xss": "^0.2.7"

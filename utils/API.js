@@ -217,7 +217,6 @@ exports.addComment = (M, req, res, next) => {
       }
     })
 };
-
 exports.delete = (M, req, res, next) => {
     return M.findById(req.params.id)
       .exec((err, doc) => {
@@ -235,7 +234,6 @@ exports.delete = (M, req, res, next) => {
       })
 
 };
-
 exports.addSolution = (M, req, res, next) => {
   return M.findById(req.params.id)
     .exec((err, doc) => {
@@ -252,7 +250,6 @@ exports.addSolution = (M, req, res, next) => {
       }
     })
 };
-
 exports.getByPermalink = (M, req, res, next) => {
   return M.findOne({permalink: req.params.permalink})
     .populate('tags')
@@ -269,8 +266,6 @@ exports.getByPermalink = (M, req, res, next) => {
       }
     })
 };
-
-
 exports.judgeTag = (M, req, res, next) => {
   return M.findById(req.params.id)
     .exec((err, doc) => {
@@ -290,3 +285,8 @@ exports.judgeTag = (M, req, res, next) => {
       }
     })
 };
+
+exports.getUserById = ((req, res, next) => {
+  var userId = req.params.id;
+
+});

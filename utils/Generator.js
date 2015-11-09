@@ -18,7 +18,7 @@ class Generator {
       data.fauxUser, {
         helpers: data.helpers,
         data: {
-          groupName: level === 1 ? 'user' : level === 2 ? 'moderator' : level === 3 ? 'admin' : null
+          groupName: level === 1 ? 'user' : level === 2 ? 'moderators' : level === 3 ? 'admins' : null
         }
       }
     ));

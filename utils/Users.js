@@ -17,8 +17,14 @@ class Users {
 
 
   static getId(userObject) {
-    if (userObject && userObject.username) {
-      return md5(process.env.USER_HASH + userObject.username);
+    if (userObject) {
+      if (!userObject.href) {
+        return('dummy');
+      }
+
+      let parts = userObject.href.split('/');
+      return (parts[parts.length -1 ]);
+
     } else {
       return null;
     }

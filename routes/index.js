@@ -25,6 +25,16 @@ router.get('/tutorial-request/:permalink', (req, res, next) =>
     Utils.API.getByPermalink(TutorialRequest, req, res, next)
 );
 
+
+router.get('/account', (req, res, next) => {
+  res.render('script', {
+    js_id: 'account',
+    js: 'account',
+    user: req.user ? JSON.stringify(req.user) : ''
+  });
+})
+
+
 router.get('/users/dummy', (req, res, next) => {
   res.render('script', {
     js_id: 'profile',

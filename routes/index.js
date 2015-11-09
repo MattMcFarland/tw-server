@@ -25,8 +25,17 @@ router.get('/tutorial-request/:permalink', (req, res, next) =>
     Utils.API.getByPermalink(TutorialRequest, req, res, next)
 );
 
+router.get('/users/dummy', (req, res, next) => {
+  res.render('script', {
+    js_id: 'profile',
+    js: 'profile',
+    user: req.user ? JSON.stringify(req.user) : '',
+    json: JSON.stringify({fullName: 'Dummy Profile Page (Fake User)'})
+  })
+});
 
 router.get('/users/:id', (req, res, next) => {
+
   request.get('https://api.stormpath.com/v1/accounts/' + req.params.id)
     .set('Accept', 'application/json')
     .query({expand: 'groups,customData'})
@@ -46,6 +55,9 @@ router.get('/users/:id', (req, res, next) => {
       }
     });
 });
+
+
+
 
 router.use((req, res, next) => {
   if (req.payload) {

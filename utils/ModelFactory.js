@@ -76,14 +76,14 @@ class ModelFactory {
         if (!this.author) {
           return '';
         }
-        return 'users/' + Utils.Users.getId(this.author);
+        return '/users/' + Utils.Users.getId(this.author);
       },
 
       getEditorUrl () {
         if (!this.editor) {
           return '';
         }
-        return 'users/' + Utils.Users.getId(this.author);
+        return '/users/' + Utils.Users.getId(this.author);
       },
 
       getUserVote (user) {

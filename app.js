@@ -53,6 +53,15 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.use(function (req, res, next){
+  if (!req.headers.host.match(/^www\./)){
+    res.redirect ('https://' + req.headers.host + req.url);
+  }else{
+    return next();
+  }
+});
+
 app.use (function (req, res, next) {
   if (req.secure) {
     // request was via https, so do no special handling

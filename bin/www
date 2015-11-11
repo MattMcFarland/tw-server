@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-
+var fs = require('fs');
 var app = require('../app');
 var debug = require('debug')('tw-server:server');
 var https = require('https');
@@ -21,7 +21,7 @@ app.set('port', port);
 
 var sslOpts;
 
-if (process.env.NODE_ENV) {
+if (process.env.NODE_ENV === 'production') {
     sslOpts = {
         key: fs.readFileSync( '/var/ssl/wanted-tuts.key' ),
         cert: fs.readFileSync( '/var/ssl/wanted-tuts.cert' )

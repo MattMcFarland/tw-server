@@ -22,15 +22,15 @@ app.set('port', port);
 
 var sslOpts;
 console.log(process.env.NODE_ENV);
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'development') {
     sslOpts = {
-        key: fs.readFileSync( '/var/ssl/wanted-tuts.key' ),
-        cert: fs.readFileSync( '/var/ssl/wanted-tuts.cert' )
+        key: fs.readFileSync( 'bin/localhost.key', 'utf8' ),
+        cert: fs.readFileSync( 'bin/localhost.cert', 'utf8' )
     }
 } else {
     sslOpts = {
-        key: fs.readFileSync( 'bin/localhost.key' ),
-        cert: fs.readFileSync( 'bin/localhost.cert' )
+        key: fs.readFileSync( '/var/ssl/wanted-tuts.key', 'utf8' ),
+        cert: fs.readFileSync( '/var/ssl/wanted-tuts.cert', 'utf8' )
     }
 }
 

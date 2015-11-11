@@ -56,7 +56,7 @@ app.use(cookieParser());
 
 app.use(function (req, res, next){
   if (!req.headers.host.match(/^www\./)){
-    res.redirect ('https://' + req.headers.host + req.url);
+    res.redirect (301, {'Location': 'https://wanted-tuts.com'});
   }else{
     return next();
   }

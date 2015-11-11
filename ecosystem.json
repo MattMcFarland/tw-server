@@ -10,7 +10,8 @@
       name      : "wanted-tuts",
       script    : "bin/www",
       env: {
-        PORT: "80"
+        PORT: "80",
+        sslPort: "443"
       },
       env_production : {
         NODE_ENV: "production"

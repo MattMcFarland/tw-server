@@ -54,11 +54,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use(function (req, res, next){
-  if (!req.headers.host.match(/^www\./)){
-    res.redirect (301, {'Location': 'https://wanted-tuts.com'});
-  }else{
-    return next();
+app.get('/*', function(req, res, next) {
+  if (req.headers.host.match(/^www/) !== null ) {
+    res.redirect(301, 'http://' + req.headers.host.replace(/^www\./, '') + req.url);
+  } else {
+    next();
   }
 });
 

@@ -1,10 +1,11 @@
 {
   "name": "@mattmcfarland/tw-server",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "FAUX_USER=true node --harmony_destructuring --harmony_proxies ./bin/www",
-    "watch": "FAUX_USER=true nodemon --harmony_destructuring --harmony_proxies ./bin/www",
+    "start": "node --harmony_destructuring --harmony_proxies ./bin/www",
+    "watch": "nodemon --harmony_destructuring --harmony_proxies ./bin/www",
+    "deploy": "pm2 deploy ecosystem.json production",
     "test": "mocha -w"
   },
   "dependencies": {

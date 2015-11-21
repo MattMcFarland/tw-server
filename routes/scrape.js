@@ -45,6 +45,7 @@ scrape.use(function(req, res, next) {
     req.payload.title || (req.payload.title = req.scrape.opengraph['og:title']);
     req.payload.thumbnailUrl || (req.payload.thumbnailUrl = req.scrape.opengraph['og:image']);
     req.payload.url || (req.payload.url = req.scrape.opengraph['og:url']);
+    console.log(chalk.yellow(req.payload.thumbnailUrl, req.scrape.opengraph['og:image']));
 
   }
 
@@ -61,12 +62,14 @@ scrape.use(function(req, res, next) {
     req.payload.title || (req.payload.title = req.scrape.meta['twitter:title']);
     req.payload.thumbnailUrl || (req.payload.thumbnailUrl = req.scrape.meta['twitter:image:src']);
     req.payload.url || (req.payload.url = req.body.url);
+    console.log(req.payload.thumbnailUrl, req.scrape.opengraph['twitter:image:src']);
 
   }
 
   next();
 
 });
+
 
 
 /* Meta */
@@ -87,7 +90,8 @@ scrape.use(function(req, res, next) {
 scrape.use(function(req, res, next) {
 
   if (req.scrape && req.scrape.tags) {
-
+    console.log(chalk.cyan(JSON.stringify(req.scrape, null, 2)));
+    console.log(chalk.magenta(JSON.stringify(req.payload, null, 2)));
     req.payload.title || (req.payload.title = req.scrape.tags['title']);
     if (req.scrape.tags.images &&
       Array.isArray(req.scrape.tags.images) &&

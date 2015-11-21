@@ -19,9 +19,16 @@ const
   index = require('./routes/index'),
   scrape = require('./routes/scrape');
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 app.use(timeout('15s'));
 
 app.use(Utils.Middlewares.timeOut());
+
 
 app.use(stormpath.init(app, {
   website: true,
@@ -31,7 +38,7 @@ app.use(stormpath.init(app, {
   }
 }));
 
-mongoose.set('debug', true);
+//mongoose.set('debug', true);
 
 var deepPopulate = require('mongoose-deep-populate')(mongoose);
 
@@ -44,7 +51,7 @@ mongoose.connect(
 )
 
 app.use(compression({level:7}));
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'node_modules/@mattmcfarland/tw-client/views'));
 app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
@@ -68,12 +75,17 @@ app.use (function (req, res, next) {
     next();
   } else {
     // request was via http, so redirect to https
-    res.redirect('https://' + req.headers.host + req.url);
+    if (app.get('env') === 'development') {
+      next ();
+    } else {
+      res.redirect('https://' + req.headers.host + req.url);
+    }
   }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/js', express.static(path.join(__dirname, 'node_modules/@mattmcfarland/tw-client/dist')));
+app.use(express.static(path.join(__dirname, 'node_modules/@mattmcfarland/tw-client/public')));
+app.use('/js', express.static(path.join(__dirname, 'node_modules/@mattmcfarland/tw-client/dist/js')));
+app.use('/style', express.static(path.join(__dirname, 'node_modules/@mattmcfarland/tw-client/dist/style')));
 
 app.use('/', index);
 

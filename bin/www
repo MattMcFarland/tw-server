@@ -27,6 +27,7 @@ app.set('SSLport', port);
 var sslOpts;
 
 if (process.env.NODE_ENV === 'development') {
+    console.log('\nfiring server up at https://localhost:8443 and :8080 /\n')
     sslOpts = {
         key: fs.readFileSync( 'bin/localhost.key', 'utf8' ),
         cert: fs.readFileSync( 'bin/localhost.cert', 'utf8' )
@@ -48,7 +49,8 @@ var server = https.createServer(sslOpts, app);
 server.listen(sslPort);
 server.on('error', onError, sslPort);
 server.on('listening', onListening);
-
+httpServer.on('error', onError, port);
+httpServer.on('listening', onListening);
 httpServer.listen(port);
 
 

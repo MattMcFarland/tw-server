@@ -48,7 +48,7 @@ class ModelFactory {
     })
   }
 
-  static createGetters () {
+  static createGetters (type) {
     return {
       getFlags () {
         return {
@@ -95,14 +95,23 @@ class ModelFactory {
 
       getUserFlags (user) {
         var uid = Utils.Users.getId(user),
+          defaultFlags,
           userFlags = _.filter(this.flaggers, { uid });
 
-        return mergeArrays([
+        if (type === "comment") {
+          defaultFlags = [
+            { "key": "spam", "value": false },
+            { "key": "offensive", "value": false }
+          ]
+        } else {
+          defaultFlags = [
             { "key": "spam", "value": false },
             { "key": "offensive", "value": false },
             { "key": "duplicate", "value": false },
             { "key": "vague", "value": false }
-          ],
+          ]
+        }
+        return mergeArrays(defaultFlags,
           userFlags.map(function (flag) {
             return {
               key: flag.type,

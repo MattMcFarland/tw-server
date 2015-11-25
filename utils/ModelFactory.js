@@ -131,7 +131,7 @@ class ModelFactory {
             user.groups.items[0] &&
             user.groups.items[0].name) {
             usergroup = user.groups.items[0].name;
-            accessLevel = usergroup === "user" ? 1 : usergroup === "moderator" ? 2 : usergroup === "admin" ? 3 : 0;
+            accessLevel = usergroup === "user" ? 1 : usergroup === "moderators" ? 2 : usergroup === "admins" ? 3 : 0;
           }
           access = (accessLevel >= 2);
         }

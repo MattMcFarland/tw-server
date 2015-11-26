@@ -90,25 +90,26 @@ api.post('/account',
   }
 );
 
-
 api.post('/profile',
   MW.authenticate(1), (req, res, next) => {
-    //let {bio, links, location, occupation}
+    var newLinks = [].concat(req.body.links);
     req.user.customData.bio = req.body.bio;
-    req.user.customData.links = req.body.links;
+    req.user.customData.links = newLinks;
     req.user.customData.location = req.body.location;
     req.user.customData.occupation = req.body.occupation;
 
     req.user.save((err, data) => {
-      if (err || !data) {
+      if (err) {
         next();
-      } else {
+      } else if (data) {
         req.payload = ({
           bio: req.user.customData.bio,
           links: req.user.customData.links,
           location: req.user.customData.location,
           occupation: req.user.customData.occupation
         });
+        next();
+      } else {
         next();
       }
     });

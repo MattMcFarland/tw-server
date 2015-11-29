@@ -9,17 +9,47 @@ exports.getAll = (M, req, res, next) => {
   var limit = req.query.limit || 10;
   var page = req.query.page || 1;
   var sortObj = req.query.sortBy === "score" ? {score: -1} : {created_at: -1}
-  var skip = (page - 1) * limit
+  var skip = (page - 1) * limit;
+  var filterBy = req.query.filterBy;
+  var category = req.query.category;
+  var getBest = function () { return obj.solutions.length > 0; }
+  var getWanted = function () { return obj.solutions.length === 0; }
+  var getApps = function () { return obj.category === "apps"; }
+  var getGaming = function () { return obj.category === "gaming"; }
+  var getGameDev = function () { return obj.category === "gamedev"; }
+  var getWebDev = function () { return obj.category === "webdev"; }
+
   var query = {
     removed: { $ne: true }
   }
   if (req.query.showpositive) {
-    query.score = { $gt: 0 }
+    query.score = { $gt: 0 };
   }
-  if (req.query.$where) {
-    query.$where = req.query.$where
+  if (req.query.filterBy !== "latest" && req.query.category === "all") {
+    query.$where = filterBy === "best" ? getBest: filterBy === "wanted" ? getWanted : null;
+
+  } else if (req.query.filterBy === "latest" && req.query.category !== "all") {
+    query.$where = category === "apps" ? getApps :
+      category === "gaming" ? getGaming :
+        category === "gamedev" ? getGameDev :
+          category === "webdev" ? getWebDev : null;
+
+  } else if (req.query.filterBy !== "latest" && req.query.category !== "all") {
+    query.$and = [
+      {
+        $where: filterBy === "best" ? getBest : filterBy === "wanted" ? getWanted : null
+      },
+      {
+        $where: category === "apps" ? getApps :
+          category === "gaming" ? getGaming :
+            category === "gamedev" ? getGameDev :
+              category === "webdev" ? getWebDev : null
+      }
+    ]
   }
-  console.log('sort', sortObj);
+
+  console.log(query);
+
   return M.find(query)
     .sort(sortObj)
     .skip(skip)

@@ -15,6 +15,15 @@ router.get('/', function(req, res) {
   });
 });
 
+router.get('/category/:category_name', function(req, res) {
+  res.render('script', {
+    js_id:'index',
+    js: 'index',
+    user: req.user ? JSON.stringify(req.user) : ''
+  });
+});
+
+
 router.get('/tutorial-request', function(req, res) {
   res.render('script', {
     js_id:'requestform',

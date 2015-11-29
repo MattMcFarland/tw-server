@@ -35,7 +35,8 @@ app.use(stormpath.init(app, {
   expand: {
     customData: true,
     groups: true
-  }
+  },
+  'cache Client': null
 }));
 
 //mongoose.set('debug', true);

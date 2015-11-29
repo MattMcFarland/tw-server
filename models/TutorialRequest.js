@@ -18,6 +18,7 @@ var tutorialRequest = Utils.ModelFactory.fabricate({
     engine:    { type: String },
     version:   { type: String },
     permalink: { type: String },
+    category: { type: String, required: true },
     tags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
     solutions: [{ type: Schema.Types.ObjectId, ref: 'TutorialSolution' }]
   },
@@ -25,6 +26,7 @@ var tutorialRequest = Utils.ModelFactory.fabricate({
     DTO (user) {
       return {
         type: "TutorialRequest",
+        category: this.category,
         id: this.id,
         engine: this.engine,
         version: this.version,

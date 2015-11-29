@@ -34,7 +34,7 @@ exports.getAll = (M, req, res, next) => {
         category === "gamedev" ? getGameDev :
           category === "webdev" ? getWebDev : null;
 
-  } else if (req.query.filterBy !== "latest" && req.query.category !== "all") {
+  } else if (req.query.filterBy && req.query.filterBy !== "latest" && req.query.category && req.query.category !== "all") {
     query.$and = [
       {
         $where: filterBy === "best" ? getBest : filterBy === "wanted" ? getWanted : null

@@ -1,6 +1,6 @@
 {
   "name": "@mattmcfarland/tw-server",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "license": "GPL-3.0",
   "scripts": {
     "start": "node --harmony_destructuring --harmony_proxies ./bin/www",

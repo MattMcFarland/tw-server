@@ -132,10 +132,11 @@ api.use((req, res, next) => {
         target: req.target,
         url: req.actionurl
       }
-      if (!req.user.customData.history) {
-        req.user.customData.history = [].push(addToArray);
-      } else {
+      var history = req.user.customData.history;
+      if (history && Array.isArray(history)) {
         req.user.customData.history.push(addToArray);
+      } else {
+        req.user.customData.history = [].push(addToArray);
       }
 
       req.user.save((err, data) => {

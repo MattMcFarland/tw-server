@@ -9,6 +9,8 @@ var app = require('../app');
 var debug = require('debug')('tw-server:server');
 var https = require('https');
 var http = require('http');
+var service = require('./socket-service');
+
 
 /**
  * Get port from environment and store in Express.
@@ -53,7 +55,8 @@ httpServer.on('error', onError, port);
 httpServer.on('listening', onListening);
 httpServer.listen(port);
 
-
+service.connectTo(server);
+service.connectTo(httpServer);
 /**
  * Normalize a port into a number, string, or false.
  */

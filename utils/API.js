@@ -48,7 +48,6 @@ exports.getAll = (M, req, res, next) => {
     ]
   }
 
-  console.log(query);
 
   return M.find(query)
     .sort(sortObj)

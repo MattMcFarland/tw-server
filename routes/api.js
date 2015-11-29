@@ -153,6 +153,29 @@ api.use((req, res, next) => {
   }
 })
 
+// brodcast socket.io signal
+api.use((req, res, next) => {
+
+
+  if (req.payload && req.action && req.target && req.excerpt) {
+    var excerpt = req.payload.title ? req.payload.title + ' ' : '';
+    excerpt += req.excerpt.substring(0, 80) + '...';
+    global.io.emit('action', {
+      action: req.action,
+      href: req.actionurl,
+      target: req.target,
+      type: req.type,
+      excerpt: excerpt,
+      user: req.user.fullName,
+      timestamp: new Date().toISOString()
+    });
+    next();
+  } else {
+    next();
+  }
+})
+
+
 // send payload to client
 api.use((req, res, next) => {
   if (req.payload) {

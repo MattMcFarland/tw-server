@@ -18,7 +18,7 @@ var tutorialRequest = Utils.ModelFactory.fabricate({
     engine:    { type: String },
     version:   { type: String },
     permalink: { type: String },
-    category: { type: String, required: true },
+    category: { type: String },
     tags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
     solutions: [{ type: Schema.Types.ObjectId, ref: 'TutorialSolution' }]
   },

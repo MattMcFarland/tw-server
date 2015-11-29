@@ -92,6 +92,7 @@ exports.addToDB = (M, req, res, next) => {
   }
 
   var create = (data) => {
+
       //console.log('creating new data', data);
       M.create(data, (err, nd) => {
         if (err) {
@@ -99,6 +100,7 @@ exports.addToDB = (M, req, res, next) => {
         } else {
           req.payload = nd.DTO(req.user);
           req.action = "createNew" + req.payload.type;
+          req.type = req.payload.type;
           req.target = req.payload.id;
           req.actionurl = "/tutorial-request/" + req.payload.permalink;
           next();
@@ -143,7 +145,6 @@ exports.addToDB = (M, req, res, next) => {
   }
 };
 exports.update = (M, req, res, next) => {
-  console.log('[update] [1] perform update >>>', req.params.id);
 
   var abort = (e) => {
     Utils.Log.error(e);
@@ -153,14 +154,12 @@ exports.update = (M, req, res, next) => {
   return M.findById(req.params.id).populate('tags')
     .exec((err, doc) => {
 
-      console.log('[update] [2] doc found >>>', doc.id);
       var doUpdate = (data) => {
-        console.log('[update] [4] run edit method ');
-        //console.log('updating data', data);
         doc.edit(data).then((nd) => {
-          console.log('[update] [5] edit method complete ');
+
           req.payload = nd.DTO(req.user);
           req.action = "update" + req.payload.type;
+          req.type = req.payload.type;
           req.target = req.payload.id;
           if (req.payload.type === "TutorialRequest") {
             req.actionurl = req.body.rootUrl
@@ -231,7 +230,7 @@ exports.vote = (M, req, res, next) => {
             //console.log('here be the v', v);
             req.payload = v;
             req.target = req.params.id;
-
+            req.excerpt = doc.message ? doc.message : doc.content ? doc.content : '';
             if (req.body.direction) {
               if (req.payload.userVote === 1 && req.body.direction === "up") {
                 req.action = "voteUp"
@@ -245,9 +244,12 @@ exports.vote = (M, req, res, next) => {
             }
             if (req.path.indexOf('request') > -1) {
               req.actionurl = req.body.rootUrl
+              req.type = 'TutorialRequest';
             } else if (req.path.indexOf('solution') > -1) {
+              req.type = 'TutorialSolution';
               req.actionurl = req.body.rootUrl + '#' + 'tutorialsolution-' + req.target
             } else if (req.path.indexOf('comment') > -1) {
+              req.type = 'Comment';
               req.actionurl = req.body.rootUrl + '#' + 'comment-' + req.target
             }
             next();
@@ -277,7 +279,7 @@ exports.addComment = (M, req, res, next) => {
         doc.addComment(req.user, req.body.message)
           .then(doc => {
             req.payload = doc.DTO(req.user);
-
+            req.excerpt = req.body.message;
             if (req.path.indexOf('request') > -1) {
               req.action = "addCommentToTutorialRequest";
             } else if (req.path.indexOf('solution') > -1) {
@@ -331,6 +333,7 @@ exports.addSolution = (M, req, res, next) => {
             req.payload = doc.DTO(req.user);
             req.action = "addSolution";
             req.target = req.params.id;
+            req.type = 'TutorialSolution'
             req.actionurl = req.body.rootUrl + '#' + 'tutorialsolution-' + req.target
             next();
           })

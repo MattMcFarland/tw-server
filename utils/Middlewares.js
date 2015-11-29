@@ -23,6 +23,8 @@ class Middlewares {
       var access = false;
       //console.log('checking account auth...');
       if (req.user) {
+        req.accessLevel = 1;
+
         //console.log('Found user ' + req.user.username);
         if (req.user.groups && typeof req.user.groups.items &&
           req.user.groups.items[0] &&
@@ -30,12 +32,12 @@ class Middlewares {
           req.usergroup = req.user.groups.items[0].name;
           req.accessLevel = req.usergroup === "moderators" ? 2 : req.usergroup === "admins" ? 3 : 1;
         }
-        //console.log('usergroup', req.usergroup);
-        //console.log('accessLevel', req.accessLevel);
-        //console.log('level required', level);
-        ////console.log(req.accessLevel);
+        console.log('usergroup', req.usergroup);
+        console.log('accessLevel', req.accessLevel);
+        console.log('level required', level);
+        console.log(req.accessLevel);
         access = (req.accessLevel >= level);
-        //console.log('User access: ' + access);
+        console.log('User access: ' + access);
         if (!req.user.customData.uid) {
           req.user.customData.uid = Utils.Users.getId(req.user);
 

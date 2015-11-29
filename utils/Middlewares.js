@@ -28,7 +28,7 @@ class Middlewares {
           req.user.groups.items[0] &&
           req.user.groups.items[0].name) {
           req.usergroup = req.user.groups.items[0].name;
-          req.accessLevel = req.usergroup === "user" ? 1 : req.usergroup === "moderators" ? 2 : req.usergroup === "admins" ? 3 : 0;
+          req.accessLevel = req.usergroup === "moderators" ? 2 : req.usergroup === "admins" ? 3 : 1;
         }
         //console.log('usergroup', req.usergroup);
         //console.log('accessLevel', req.accessLevel);

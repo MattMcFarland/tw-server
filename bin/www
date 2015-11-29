@@ -55,8 +55,13 @@ httpServer.on('error', onError, port);
 httpServer.on('listening', onListening);
 httpServer.listen(port);
 
-service.connectTo(server);
-service.connectTo(httpServer);
+
+if (process.env.NODE_ENV === 'development') {
+  service.connectTo(httpServer);
+} else {
+  service.connectTo(server);
+}
+
 /**
  * Normalize a port into a number, string, or false.
  */

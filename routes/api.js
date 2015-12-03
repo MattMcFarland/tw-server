@@ -135,6 +135,9 @@ api.use((req, res, next) => {
       var history = req.user.customData.history;
       if (history && Array.isArray(history)) {
         req.user.customData.history.push(addToArray);
+        if (req.user.customData.history.length > 30) {
+          req.user.customData.history.shift();
+        }
       } else {
         req.user.customData.history = [].push(addToArray);
       }

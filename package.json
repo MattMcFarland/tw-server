@@ -9,7 +9,7 @@
     "test": "mocha -w"
   },
   "dependencies": {
-    "@mattmcfarland/tw-client": "2.6.2",
+    "@mattmcfarland/tw-client": "2.6.3",
     "async": "^1.4.2",
     "body-parser": "~1.13.2",
     "chalk": "^1.1.1",

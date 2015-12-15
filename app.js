@@ -109,13 +109,14 @@ app.use('/api/tutorialSolution', api.tutorialSolution);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
-  var err = new Error('Not Found');
-  err.status = 404;
-  err.request = {
-    body: req.body || {},
-    params: req.params || {}
-  };
-  next(err);
+  res.status(404);
+  res.render("page-error", {
+    js_id:'page',
+    js: 'page',
+    status: 404,
+    message: 'Page not found!',
+    user: req.user ? JSON.stringify(req.user) : ''
+  });
 });
 
 // error handlers
@@ -123,11 +124,13 @@ app.use((req, res, next) => {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-  app.use((err, req, res) => {
+  app.use((err, req, res, next) => {
 
-    console.log(err);
-    res.status(err.status || 500);
-    res.send("error", {
+
+    res.render("page-error", {
+      js_id:'page',
+      js: 'page',
+      user: req.user ? JSON.stringify(req.user) : '',
       status: err.status || 500,
       request: {
         body: req.body || {},
@@ -142,10 +145,12 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use((err, req, res) => {
-
+app.use((err, req, res, next) => {
   res.status(err.status || 500);
-  res.send("error", {
+  res.render("page-error", {
+    js_id:'page',
+    user: req.user ? JSON.stringify(req.user) : '',
+    js: 'page',
     status: err.status || 500,
     error: {}
   });

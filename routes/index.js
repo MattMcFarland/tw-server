@@ -13,7 +13,9 @@ router.get('/', function(req, res) {
     js: 'index',
     user: req.user ? JSON.stringify(req.user) : '',
     title: 'Tutorials Wanted!',
-    content: 'Find, submit and request tutorials here'
+    content: 'Find, submit and request tutorials here',
+    url: "https://wanted-tuts.com/" + req.path,
+    thumbnail: "https://wanted-tuts.com/img/wt-logo-2.png"
   });
 });
 
@@ -23,7 +25,9 @@ router.get('/category/:category_name', function(req, res) {
     js: 'index',
     title: 'Tutorials about ' + req.params.category_name,
     content: 'Find, submit, and request tutorials about ' + req.params.category_name,
-    user: req.user ? JSON.stringify(req.user) : ''
+    user: req.user ? JSON.stringify(req.user) : '',
+    url: "https://wanted-tuts.com/" + req.path,
+    thumbnail: "https://wanted-tuts.com/img/wt-logo-2.png"
   });
 });
 
@@ -34,7 +38,9 @@ router.get('/tutorial-request', function(req, res) {
     js: 'requestform',
     title: 'Request a tutorial',
     content: 'What kind of tutorial are you looking for? fill out the form and get help',
-    user: req.user ? JSON.stringify(req.user) : ''
+    user: req.user ? JSON.stringify(req.user) : '',
+    url: "https://wanted-tuts.com/" + req.path,
+    thumbnail: "https://wanted-tuts.com/img/wt-logo-2.png"
   });
 });
 
@@ -79,13 +85,50 @@ router.get('/users/:id', (req, res, next) => {
           js_id: 'profile',
           js: 'profile',
           user: req.user ? JSON.stringify(req.user) : '',
-          json: JSON.stringify(data.body)
+          json: JSON.stringify(data.body),
+          url: "https://wanted-tuts.com/" + req.path,
+          thumbnail: "https://wanted-tuts.com/img/wt-logo-2.png"
         })
       }
     });
 });
 
 
+router.get('/about', (req, res, next) => {
+  res.render('page-about', {
+    js_id:'page',
+    js: 'page',
+    user: req.user ? JSON.stringify(req.user) : '',
+    url: "https://wanted-tuts.com/" + req.path,
+    thumbnail: "https://wanted-tuts.com/img/wt-logo-2.png",
+    title: 'About wanted-tuts.com',
+    content: "It's the about us page"
+  })
+});
+
+router.get('/terms-of-use', (req, res, next) => {
+  res.render('page-tou', {
+    js_id:'page',
+    js: 'page',
+    user: req.user ? JSON.stringify(req.user) : '',
+    url: "https://wanted-tuts.com/" + req.path,
+    thumbnail: "https://wanted-tuts.com/img/wt-logo-2.png",
+    title: 'WANTED-TUTS: Terms of Use',
+    content: "It's the Terms of use page!"
+  })
+});
+
+router.get('/privacy', (req, res, next) => {
+  res.render('page-privacy', {
+    js_id:'page',
+    js: 'page',
+    user: req.user ? JSON.stringify(req.user) : '',
+    url: "https://wanted-tuts.com/" + req.path,
+    thumbnail: "https://wanted-tuts.com/img/wt-logo-2.png",
+    title: 'WANTED-TUTS: Privacy Policy',
+    content: "It's the Privacy Policy Page"
+  })
+});
 
 
 router.use((req, res, next) => {
@@ -97,7 +140,9 @@ router.use((req, res, next) => {
       json: JSON.stringify(req.payload),
       data: req.payload,
       title: req.payload.title,
-      content: req.payload.content
+      content: req.payload.content,
+      url: "https://wanted-tuts.com/" + req.path,
+      thumbnail: "https://wanted-tuts.com/img/wt-logo-2.png"
     });
   } else {
     next();

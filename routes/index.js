@@ -96,8 +96,8 @@ router.use((req, res, next) => {
       user: req.user ? JSON.stringify(req.user) : '',
       json: JSON.stringify(req.payload),
       data: req.payload,
-      title: data.title,
-      content: data.content
+      title: req.payload.title,
+      content: req.payload.content
     });
   } else {
     next();

@@ -64,14 +64,26 @@ class ModelFactory {
         }
         return this.author.fullName;
       },
+      getAuthorAvatar () {
+        if (this.author && this.author.customData && this.author.customData.avatar) {
+          return this.author.customData.avatar;
+        } else { return ''; }
 
+      },
       getEditorName () {
         if (!this.editor) {
           return '';
         }
         return this.editor.fullName;
       },
+      getEditorAvatar () {
+        if (this.editor && this.editor.customData && this.editor.customData.avatar) {
+          return this.editor.customData.avatar
+        } else {
+          return '';
+        }
 
+      },
       getAuthorUrl () {
         if (!this.author) {
           return '';

@@ -93,6 +93,7 @@ api.post('/account',
 api.post('/profile',
   MW.authenticate(1), (req, res, next) => {
     var newLinks = [].concat(req.body.links);
+    req.user.customData.avatar = req.body.avatar;
     req.user.customData.bio = req.body.bio;
     req.user.customData.links = newLinks;
     req.user.customData.location = req.body.location;
@@ -103,6 +104,7 @@ api.post('/profile',
         next();
       } else if (data) {
         req.payload = ({
+          avatar: req.user.customData.avatar,
           bio: req.user.customData.bio,
           links: req.user.customData.links,
           location: req.user.customData.location,

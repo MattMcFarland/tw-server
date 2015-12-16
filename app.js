@@ -107,6 +107,23 @@ app.use('/api/tutorialRequest', api.tutorialRequest);
 app.use('/api/tutorialSolution', api.tutorialSolution);
 */
 
+
+app.use((req, res, next) => {
+  var err = new Error('Not Found');
+  err.status = 404;
+  err.request = {
+    body: req.body || {},
+    params: req.params || {}
+  };
+  next(err);
+});
+
+
+api.use((err, req, res, next) => {
+  res.status(err.status || 500);
+  res.send(err.status || 500);
+})
+
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   res.status(404);

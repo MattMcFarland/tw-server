@@ -1,6 +1,6 @@
 {
   "name": "@mattmcfarland/tw-server",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "license": "GPL-3.0",
   "scripts": {
     "start": "node --harmony_destructuring --harmony_proxies ./bin/www",
@@ -9,7 +9,7 @@
     "test": "mocha -w"
   },
   "dependencies": {
-    "@mattmcfarland/tw-client": "2.9.2",
+    "@mattmcfarland/tw-client": "2.9.4",
     "async": "^1.4.2",
     "body-parser": "~1.13.2",
     "chalk": "^1.1.1",

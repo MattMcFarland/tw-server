@@ -4,6 +4,7 @@ const
   Utils         = require('./index'),
   mongoose      = require('mongoose'),
   paginate      = require('mongoose-paginate'),
+  gravatar      = require('gravatar'),
   Schema        = mongoose.Schema;
 
 var mergeArrays = function (dest, source) {
@@ -65,8 +66,9 @@ class ModelFactory {
         return this.author.fullName;
       },
       getAuthorAvatar () {
-        if (this.author && this.author.customData && this.author.customData.avatar) {
-          return this.author.customData.avatar;
+        if (this.author && this.author.username) {
+          var avatar = gravatar.url(this.author.username, {s: '100', d: 'retro'}, true);
+          return avatar;
         } else { return ''; }
 
       },
@@ -77,8 +79,9 @@ class ModelFactory {
         return this.editor.fullName;
       },
       getEditorAvatar () {
-        if (this.editor && this.editor.customData && this.editor.customData.avatar) {
-          return this.editor.customData.avatar
+        if (this.editor && this.editor.username) {
+          var avatar = gravatar.url(this.editor.username, {s: '100', d: 'retro'}, true);
+          return avatar;
         } else {
           return '';
         }
